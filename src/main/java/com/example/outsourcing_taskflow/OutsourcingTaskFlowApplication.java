@@ -1,4 +1,4 @@
-package com.example.outsourcing_teskflow;
+package com.example.outsourcing_taskflow;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
