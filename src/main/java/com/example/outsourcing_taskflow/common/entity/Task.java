@@ -35,7 +35,7 @@ public class Task extends BaseEntity {
     private TaskPriorityEnum priority; // 작업 우선순위, 기본값 없음
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User assignee; // 담당자 - 유저 FK
 
     @Column(nullable = false)
