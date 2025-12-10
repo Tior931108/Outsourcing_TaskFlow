@@ -20,7 +20,7 @@ public class ActivityLog {
     private Long id;
     // - 활동 타입
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "action_type", nullable = false, length = 255)
     private ActivityType type;
     // - 사용자
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,10 +31,19 @@ public class ActivityLog {
     @JoinColumn(name = "task_id")
     private Task task;
     // - 로그 내용
-    @Column(nullable = false, length = 255)
+    @Column(name = "description", nullable = false, length = 255)
     private String description;
     // - 생성일
     @CreatedDate
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+// - Method
+    // - Factory Method
+    public static ActivityLog of(ActivityType type,
+                                 User user,
+                                 Task task,
+                                 String description) {
+        return new ActivityLog(null, type, user, task, description, null);
+    }
 }
