@@ -1,16 +1,13 @@
 package com.example.outsourcing_taskflow.common.exception;
 
+import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -19,42 +16,42 @@ public class GlobalExceptionHandler {
 
     // Validation 실패 (400 Bad request)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException exception) {
-        // 에러 응답 Map 저장
-        Map<String, Object> errorResponse = new HashMap<>();
-        // validaion 유효성 검사 메시지 저장
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException exception) {
+        // 첫 번째 에러 메시지를 사용
+        String message = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("입력값이 유효하지 않습니다.");
 
-        // 모든 필드 에러 수집
-        for (FieldError error : exception.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
+        log.error("Validation 실패: {}", message);
 
-        // 상태 코드 표시
-        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
-        // validation 유효성 검사 내용
-        errorResponse.put("errors", errors);
-
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        // ApiResponse를 사용하여 일관된 형식으로 반환 (data는 null)
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error(message));
     }
 
     // 커스텀 예외 처리
     @ExceptionHandler(value = CustomException.class)
-    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException e) {
-        log.error("CustomException 발생 {} : ", e.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
+        log.error("CustomException 발생 - ErrorCode: {}, Message: {}",
+                e.getErrorMessage(), e.getMessage());
 
-        // 에러 응답 Map 저장
-        Map<String, Object> errorResponse = new HashMap<>();
-        // 커스텀 비즈니스 유효성 검사 메시지 저장
-        Map<String, String> errors = new HashMap<>();
+        // ApiResponse를 사용하여 일관된 형식으로 반환
+        return ResponseEntity
+                .status(e.getErrorMessage().getStatus())
+                .body(ApiResponse.error(e.getMessage()));
+    }
 
-        // 상태 코드 및 Error Enum 표시
-        errorResponse.put("code", e.getErrorMessage());
-        errorResponse.put("status", e.getErrorMessage().getStatus().value());
-        // 커스텀 유효성 검사 내용
-        errorResponse.put("errors", e.getMessage());
+    // 예상하지 못한 예외 처리 (500 Internal Server Error)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        log.error("예상하지 못한 예외 발생: ", e);
 
-        return ResponseEntity.status(e.getErrorMessage().getStatus()).body(errorResponse);
+        return ResponseEntity
+                .internalServerError()
+                .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));
     }
 }
