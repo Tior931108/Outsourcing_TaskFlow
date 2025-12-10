@@ -5,6 +5,7 @@ import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,15 @@ public class UserService {
         UserDto userDto = UserDto.from(user);
 
         return CreateUserResponse.from(userDto);
+    }
+
+    /**
+     * 로그인
+     */
+    public void login(LoginUserRequest request) {
+
+        String username = request.getUsername();
+        String password = request.getPassword();
+
     }
 }
