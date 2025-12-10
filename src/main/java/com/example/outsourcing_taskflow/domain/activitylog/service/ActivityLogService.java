@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ActivityLogService {
 // - Properties
-    private final ActivityLogRepository activitylogRepository;
+    private final ActivityLogRepository activityLogRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
 
@@ -23,29 +23,12 @@ public class ActivityLogService {
     // - Log
     @Transactional
     public void log(ActivityType type,
-                    Long userId,
-                    Long taskId,
-                    String description) {
-        // - Find User, Task
-        User user = userRepository.getReferenceById(userId);
-        Task task = taskRepository.getReferenceById(taskId);
-
-        // - Create Log
-        ActivityLog log = ActivityLog.of(type, user, task, description);
-
-        // - Save Log
-        activitylogRepository.save(log);
-    }
-    // - If exist User, Task Object
-    @Transactional
-    public void log(ActivityType type,
                     User user,
                     Task task,
                     String description) {
         // - Create Log
         ActivityLog log = ActivityLog.of(type, user, task, description);
-
         // - Save Log
-        activitylogRepository.save(log);
+        activityLogRepository.save(log);
     }
 }
