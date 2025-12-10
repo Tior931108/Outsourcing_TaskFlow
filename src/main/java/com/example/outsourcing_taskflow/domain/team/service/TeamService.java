@@ -8,9 +8,11 @@ import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListRes
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponse;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.response.CreateTeamResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.response.TeamDetailResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.response.TeamListResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.response.UpdateTeamResponse;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -134,5 +136,39 @@ public class TeamService {
 
         // 9. 최종 변환된 DTO 리스트를 반환
         return teamResponseDtos;
+    }
+
+    /**
+     * 팀 수정
+     */
+    public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
+
+        // 1. Team 엔티티 조회
+        Team team = teamRepository.findByIdAndIsDeleted(teamId, IsDeleted.FALSE)
+                .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
+
+        // 2. Team 수정 정보 업데이트
+        team.update(request.getName(), request.getDescription());
+
+        // 3. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
+        List<Member> members = memberRepository.findAllByTeamId(teamId);
+
+        // 4. 멤버 DTO를 담을 빈 리스트를 준비
+        List<MemberDetailReasponse> memberResponses = new ArrayList<>();
+
+        // 5. 멤버 엔티티 리스트를 순회하는 for 루프 시작
+        for (Member member : members) {
+
+            // 5-1. MemberDetailReasponse로 변환
+            MemberDetailReasponse memberResponse = new MemberDetailReasponse(member.getUser());
+            // 5-2. 변환된 DTO를 memberResponses 리스트에 추가
+            memberResponses.add(memberResponse);
+        }
+
+        // 6. 최종 UpdateTeamResponse 생성
+        UpdateTeamResponse updateTeamResponse = new UpdateTeamResponse(team, memberResponses);
+
+        // 7. DTO로 변환하여 반환
+        return updateTeamResponse;
     }
 }

@@ -1,10 +1,14 @@
 package com.example.outsourcing_taskflow.domain.team.controller;
 
+import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.response.CreateTeamResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.response.TeamDetailResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.response.TeamListResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.response.UpdateTeamResponse;
+import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import com.example.outsourcing_taskflow.domain.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final TeamRepository teamRepository;
 
     /**
      * 팀 생성 API
@@ -65,7 +70,24 @@ public class TeamController {
 
         // 응답 반환
         return ResponseEntity.ok(
-                ApiResponse.success("팀 조회 성공", teamResponse)
+                ApiResponse.success("팀 목록 조회 성공", teamResponse)
         );
     }
+
+    /**
+     * 팀 수정 API
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UpdateTeamResponse>> updateTeamApi(@PathVariable("id") Long id, @Valid @RequestBody UpdateTeamRequest request) {
+
+        // 핵심 비지니스 로직
+        UpdateTeamResponse updateTeamResponse = teamService.updateTeam(id, request);
+
+        // 응답 반환
+        return ResponseEntity.ok(
+                ApiResponse.success("팀 정보가 수정되었습니다.", updateTeamResponse)
+        );
+
+    }
+
 }
