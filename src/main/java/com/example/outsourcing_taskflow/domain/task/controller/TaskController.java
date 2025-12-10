@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.task.controller;
 
+import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.service.TaskService;
@@ -18,9 +19,9 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public CreateTaskResponse createTask(@Valid @RequestBody CreateTaskRequest createTaskRequest) {
-        CreateTaskResponse response = taskService.createTask(createTaskRequest);
-        return response;
+    public ApiResponse<CreateTaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request) {
+        CreateTaskResponse response = taskService.createTask(request);
+        return ApiResponse.success("작업이 생성되었습니다.", response);
     }
 
 }

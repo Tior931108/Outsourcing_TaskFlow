@@ -1,4 +1,4 @@
-package com.example.outsourcing_taskflow.domain.team.dto;
+package com.example.outsourcing_taskflow.domain.task.dto;
 
 import com.example.outsourcing_taskflow.common.entity.User;
 import lombok.Getter;

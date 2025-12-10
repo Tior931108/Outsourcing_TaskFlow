@@ -3,13 +3,15 @@ package com.example.outsourcing_taskflow.domain.task.dto.response;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
-import com.example.outsourcing_taskflow.domain.team.dto.AssigneeInfo;
+import com.example.outsourcing_taskflow.domain.task.dto.AssigneeInfo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@RequiredArgsConstructor
 public class CreateTaskResponse {
 
     private final Long id;
@@ -29,17 +31,19 @@ public class CreateTaskResponse {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private final LocalDateTime dueDate;
 
-    public CreateTaskResponse(Task task) {
-        this.id = task.getId();
-        this.title = task.getTitle();
-        this.description = task.getDescription();
-        this.status = task.getStatus();
-        this.priority = task.getPriority();
-        this.assigneeId = task.getAssignee().getId();
-        this.assignee = new AssigneeInfo(task.getAssignee());
-        this.createdAt = task.getCreatedAt();
-        this.updatedAt = task.getUpdatedAt();
-        this.dueDate = task.getDueDate();
+    public static CreateTaskResponse from(Task task) {
+        return new CreateTaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getPriority(),
+                task.getAssignee().getId(),
+                new AssigneeInfo(task.getAssignee()),
+                task.getCreatedAt(),
+                task.getUpdatedAt(),
+                task.getDueDate()
+        );
     }
 
 }
