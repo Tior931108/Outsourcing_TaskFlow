@@ -31,4 +31,14 @@ public class Team extends BaseEntity{
         this.description = description;
         this.isDeleted = IsDeleted.FALSE;
     }
+
+    // 업데이트 기능
+    public void update(String teamName,String description) {
+        if (teamName != null && !teamName.trim().isEmpty()) {
+            this.teamName = teamName.trim();
+        }
+        if (description != null && !description.trim().isEmpty()) {
+            this.description = description.trim();
+        }
+    }
 }
