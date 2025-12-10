@@ -1,25 +1,26 @@
 package com.example.outsourcing_taskflow.domain.team.dto.response;
 
-import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
-import com.example.outsourcing_taskflow.domain.member.dto.response.ReadMemberDetailReasponse;
+import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponse;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-public class ReadTeamDetailResponse {
+@JsonPropertyOrder({"id", "name", "description", "createdAt", "members"})
+public class TeamDetailResponse {
 
     // 속성
     private Long id;
     private String name;
     private String description;
     private LocalDateTime createdAt;
-    private List<ReadMemberDetailReasponse> members;
+    private List<MemberDetailReasponse> members;
 
     // 생성자
-    public ReadTeamDetailResponse(Team team, List<ReadMemberDetailReasponse> members) {
+    public TeamDetailResponse(Team team, List<MemberDetailReasponse> members) {
         this.id = team.getId();
         this.name = team.getTeamName();
         this.description = team.getDescription();

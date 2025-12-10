@@ -11,6 +11,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     // 팀 이름으로 조회하는 메서드
     Optional<Team> findByTeamName(String teamName);
-
+    Optional<Team> findByIdAndIsDeleted(Long id, IsDeleted isDeleted);
     List<Team> findAllByIsDeleted(IsDeleted isDeleted);
 }
