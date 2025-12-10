@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ActivityType {
+// - Properties
+    // - ENUMS
     TASK_CREATED("작업 생성"),
     TASK_UPDATED("작업 수정"),
     TASK_DELETED("작업 삭제"),
