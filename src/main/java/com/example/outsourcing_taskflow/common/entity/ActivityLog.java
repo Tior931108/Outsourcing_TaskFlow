@@ -36,6 +36,5 @@ public class ActivityLog {
     // - 생성일
     @CreatedDate
     @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 }
