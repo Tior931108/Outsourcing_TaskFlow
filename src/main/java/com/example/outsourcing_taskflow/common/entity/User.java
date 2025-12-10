@@ -39,4 +39,13 @@ public class User extends BaseEntity {
     @Builder.Default
     private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
 
+
+    public User(String userName, String email, String password, String name) {
+        this.userName = userName;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.isDeleted = IsDeleted.FALSE;
+        this.role = UserRoleEnum.USER;
+    }
 }
