@@ -21,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.outsourcing_taskflow.common.enums.ErrorMessage.EXIST_TEAM_NAME;
-import static com.example.outsourcing_taskflow.common.enums.ErrorMessage.NOT_FOUND_TEAM;
+import static com.example.outsourcing_taskflow.common.enums.ErrorMessage.*;
 
 @Service
 @Transactional
@@ -34,9 +33,7 @@ public class TeamService {
 
     /**
      * 팀 생성
-     *
      * @param createTeamRequest
-     * @return
      */
     public CreateTeamResponse createTeam(CreateTeamRequest createTeamRequest) {
 
@@ -64,7 +61,6 @@ public class TeamService {
 
     /**
      * 팀 상세 조회
-     *
      * @param teamId
      */
     public TeamDetailResponse getTeamDetail(Long teamId) {
@@ -102,7 +98,7 @@ public class TeamService {
     @Transactional(readOnly = true)
     public List<TeamListResponse> getTeamList() {
 
-        // 1. 데이터 조회: Team 엔티티만 조회합니다. (멤버 정보는 제외)
+        // 1. 데이터 조회: Team 엔티티만 조회 (멤버 정보는 제외)
         List<Team> teams = teamRepository.findAllByIsDeleted(IsDeleted.FALSE);
 
         // 2. 최종 결과를 담을 빈 리스트를 준비
@@ -140,6 +136,8 @@ public class TeamService {
 
     /**
      * 팀 수정
+     * @param teamId
+     * @param request
      */
     public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
 
@@ -170,5 +168,26 @@ public class TeamService {
 
         // 7. DTO로 변환하여 반환
         return updateTeamResponse;
+    }
+
+    /**
+     * 팀 삭제
+     * @param teamId
+     */
+    public void deleteTeam(Long teamId) {
+
+        // 1. Team 엔티티 조회
+        Team team = teamRepository.findByIdAndIsDeleted(teamId, IsDeleted.FALSE)
+                .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
+
+        // 2. 팀에 멤버가 존재하면 삭제할 수 없는 로직 구현
+        boolean hasMembers= memberRepository.existsByTeamId(teamId);
+
+        if (hasMembers) {
+            throw new CustomException(EXIST_TEAM_MEMBER_NOT_DELETE);
+        }
+
+        // 3. Team 삭제
+        team.softDelete();
     }
 }

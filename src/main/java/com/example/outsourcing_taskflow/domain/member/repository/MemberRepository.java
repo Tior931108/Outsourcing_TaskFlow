@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    List<Member> findAllWithUserByTeamId(Long teamId);
+    // 해당 teamId를 가진 모든 Member 목록을 조회하는 메서드
+    List<Member> findAllByTeamId(Long teamId);
 
-    List<Member> findAllByTeamId(Long id);
+    // 해당 teamId를 가진 멤버가 존재하는지 확인하는 메서드
+    boolean existsByTeamId(Long teamId);
 }
