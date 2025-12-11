@@ -1,12 +1,10 @@
 package com.example.outsourcing_taskflow.domain.team.controller;
 
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.response.CreateTeamResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamDetailResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamListResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.UpdateTeamResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.response.*;
 import com.example.outsourcing_taskflow.domain.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,7 @@ public class TeamController {
 
         // 응답 반환
         return ResponseEntity
-                .status(HttpStatus.CREATED) // 💡 생성 시 201 Created 사용 권장
+                .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("팀이 생성되었습니다.", response));
     }
 
@@ -102,4 +100,48 @@ public class TeamController {
         );
     }
 
+
+    /**
+     * 팀 멤버 추가 API
+     */
+    @PostMapping("/{teamId}/members")
+    public ResponseEntity<ApiResponse<CreateTeamMemberResponse>> addTeamMemberApi(@PathVariable Long teamId, @RequestBody CreateTeamMemberRequest request) {
+
+        // 핵심 비지니스 로직
+        CreateTeamMemberResponse response = teamService.addTeamMember(teamId, request);
+
+        // 응답 반환
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("팀 멤버가 추가되었습니다.", response));
+    }
+
+    /**
+     * 팀 멤버 조회 API
+     */
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMemberApi(@PathVariable Long teamId) {
+
+        // 핵심 비지니스 로직
+        List<TeamMemberResponse> teamMemberResponse = teamService.getTeamMembers(teamId);
+
+        // 응답 반환
+        return ResponseEntity.ok(
+                ApiResponse.success("팀 멤버 조회 성공", teamMemberResponse));
+    }
+
+    /**
+     * 팀 멤버 제거 API
+     */
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTeamMemberApi(@PathVariable Long teamId, @PathVariable Long userId) {
+
+        // 핵심 비지니스 로직
+        teamService.deleteTeamMember(teamId, userId);
+
+        // 응답 반환
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("팀 멤버가 제거되었습니다.", null));
+    }
 }
