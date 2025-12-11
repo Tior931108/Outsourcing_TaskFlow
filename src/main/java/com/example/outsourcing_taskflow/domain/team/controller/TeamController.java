@@ -3,10 +3,7 @@ package com.example.outsourcing_taskflow.domain.team.controller;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.response.CreateTeamResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamDetailResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamListResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.UpdateTeamResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.response.*;
 import com.example.outsourcing_taskflow.domain.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -102,4 +99,15 @@ public class TeamController {
         );
     }
 
+    /**
+     * 팀 멤버 조회
+     */
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMember(
+            @PathVariable Long teamId
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("팀 멤버 조회 성공", teamService.getTeamMembers(teamId)));
+    }
 }
