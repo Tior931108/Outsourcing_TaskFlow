@@ -264,4 +264,25 @@ public class TeamService {
         // 5. 최종 변환된 DTO 리스트를 반환
         return memberResponses;
     }
+
+    /**
+     * 팀 멤버 삭제
+     */
+    public void deleteTeamMember(Long teamId, Long userId) {
+
+        // 1. Team 엔티티 조회
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
+
+        // 2. User 엔티티 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+
+        // 3. Member 엔티티 조회
+        Member member = memberRepository.findByTeamAndUser(team, user)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM_MEMBER));
+
+        // 4. Member 제거
+        memberRepository.delete(member);
+    }
 }
