@@ -5,6 +5,7 @@ import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ActivityType;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetActivityLogResponse;
+import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetMyActivityLogResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.repository.ActivityLogRepository;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
@@ -38,7 +39,7 @@ public class ActivityLogService {
         // - Save Log
         activityLogRepository.save(log);
     }
-    // - Get ActivityLogs By Conditions
+    // - Get All ActivityLogs By Conditions
     @Transactional
     public Page<GetActivityLogResponse> getActivityLogs(
             int page, int size, String type, Long taskId, LocalDateTime startDate, LocalDateTime endDate) {
@@ -58,5 +59,19 @@ public class ActivityLogService {
 
         // - Return Result
         return logs.map(GetActivityLogResponse::from);
+    }
+    // - Get My ActivityLogs
+    public Page<GetMyActivityLogResponse> getMyActivityLogs(
+            Long userId, int page, int size) {
+        // - Create Pageable
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // - Search
+        Page<ActivityLog> logs =
+                activityLogRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+
+        // - Return Result
+        return logs.map(GetMyActivityLogResponse::from);
     }
 }

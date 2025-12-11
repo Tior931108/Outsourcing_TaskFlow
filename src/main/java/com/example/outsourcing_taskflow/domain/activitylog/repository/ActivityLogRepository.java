@@ -26,6 +26,7 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
             @Param("taskId") Long taskId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
-            Pageable pageable
-    );
+            Pageable pageable);
+    // - Search My ActivityLogs
+    Page<ActivityLog> findByUserIdOrderByCreatedAtDesc(Long userid, Pageable pageable);
 }

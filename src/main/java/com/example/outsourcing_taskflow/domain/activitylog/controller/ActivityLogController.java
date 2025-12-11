@@ -1,8 +1,10 @@
 package com.example.outsourcing_taskflow.domain.activitylog.controller;
 
+import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetActivityLogResponse;
+import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetMyActivityLogResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,11 +36,27 @@ public class ActivityLogController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(name = "endDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        // - Create Response
+        // - Get Result
         Page<GetActivityLogResponse> pageResult = activityLogService.getActivityLogs(
                 page, size, type, taskId, startDate, endDate);
-        // - Return ApiResponse<PageResponse<T>>
+        // - Create ResponseDto
         PageResponse<GetActivityLogResponse> body = PageResponse.success("활동 로그 조회 성공", pageResult);
+        // - Return ResponseEntity<PageResponse<T>>
+        return ResponseEntity.ok(body);
+    }
+    // - Get My
+    @GetMapping("/me")
+    public ResponseEntity<PageResponse<GetMyActivityLogResponse>> getMyActivityLogs(
+            //@Authuser
+            @RequestParam(name = "userId") Long userId,
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
+        // - Get Result
+        Page<GetMyActivityLogResponse> pageResult = activityLogService.getMyActivityLogs(
+                userId, page, size);
+        // - Create ResponseDto
+        PageResponse<GetMyActivityLogResponse> body = PageResponse.success("내 활동 로그 조회 성공", pageResult);
+        // - Return ResponseEntity<PageResponse<T>>
         return ResponseEntity.ok(body);
     }
 }
