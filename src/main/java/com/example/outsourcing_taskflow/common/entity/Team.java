@@ -41,9 +41,4 @@ public class Team extends BaseEntity{
             this.description = description.trim();
         }
     }
-
-    // 소프트 딜리트 기능
-    public void softDelete() {
-        this.isDeleted = IsDeleted.TRUE;
-    }
 }
