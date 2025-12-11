@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.common.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
@@ -12,6 +13,7 @@ public class PageResponse<T> {
     private final boolean success;
     private final String message;
     private final PageData<T> data;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private final Instant timestamp;
 
     public PageResponse(boolean success, String message, PageData<T> data) {

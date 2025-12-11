@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.common.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ public class ApiResponse<T> {
     private final boolean success;
     private final String message;
     private final T data;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private final Instant timestamp;
 
     public ApiResponse(boolean success, String message, T data) {
