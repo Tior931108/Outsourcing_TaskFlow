@@ -1,17 +1,21 @@
 package com.example.outsourcing_taskflow.domain.comment.service;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
+import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.response.ReadCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.repository.CommentRepository;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,9 +47,9 @@ public class CommentService {
     }
 
     @Transactional
-    public CreateCommentResponse createComment(Long taskId, CreateCommentRequest request, Long userId) {
-        // 0. User 조회 (임시) > Security 적용 후 리팩토링 예정
-        User user = userRepository.findById(userId)
+    public CreateCommentResponse createComment(Long taskId, CreateCommentRequest request, AuthUserDto authUserDto) {
+        // 0. User 조회
+        User user = userRepository.findById(authUserDto.getId())
                 .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_USER));
 
         // 1. Task 존재 여부 확인
@@ -62,6 +66,31 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return CreateCommentResponse.from(savedComment);
+    }
+
+    @Transactional
+    public CommentResponseDto updateComment(Long taskId, Long commentId, @Valid UpdateCommentRequest request, AuthUserDto authUserDto) {
+
+        // 1. Task 존재 여부 확인
+        if (!taskRepository.existsById(taskId)) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
+        // 2. 댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_COMMENT));
+
+        // 3. 권한 확인: 댓글 작성자만 수정 가능
+        if (!comment.getUser().getId().equals(authUserDto.getId())) {
+            throw new CustomException(ErrorMessage.NOT_MODIFY_COMMENT_AUTHORIZED);
+        }
+
+        // 4. 댓글 내용 수정
+        comment.updateContent(request.getContent());
+        commentRepository.flush();
+
+        // 5. 변경 감지로 자동 저장됨 (Dirty Checking)
+        return CommentResponseDto.from(comment);
     }
 
     /**
@@ -94,6 +123,4 @@ public class CommentService {
         }
         return new Comment(content, user, task);
     }
-
-
 }
