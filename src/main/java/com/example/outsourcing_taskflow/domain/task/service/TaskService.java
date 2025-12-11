@@ -1,24 +1,25 @@
 package com.example.outsourcing_taskflow.domain.task.service;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
+import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -123,6 +124,37 @@ public class TaskService {
         // DTO 매핑
         return tasks.map(GetTaskResponse::from);
 
+    }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+    public UpdateTaskResponse updateTask(Long taskId, UpdateTaskRequest request, AuthUserDto authUserDto) {
+
+        // 작업 가져오기 + 404 Not Found: 작업을 찾을 수 없음
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
+
+        // [현재 접속중인 사용자] = [작업 담당자] || [관리자] 가 !아닐 경우 -> 403 Forbidden: 수정 권한 없음
+        // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
+        boolean isAssignee = authUserDto.getId().equals(task.getAssignee().getId());
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.name());
+
+        // 담당자가 아니고 + 관리자가 아니면 -> 403 Forbidden
+        if (!isAssignee && !isAdmin) {
+            throw new CustomException(ErrorMessage.NOT_MODIFY_AUTHORIZED);
+        }
+
+        // 요청에서 받아온 담당자 id에 매칭되는 유저 찾기 + 예외처리
+        User newAssignee = null;
+        if (request.getAssigneeId() != null) {
+            newAssignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK_USER));
+        }
+
+        // 엔티티 업데이트
+        task.update(request, newAssignee);
+        // 변경 감지(Dirty Checking)에 의해 자동 업데이트
+        return UpdateTaskResponse.from(task);
     }
 
 // ---------------------------------------------------------------------------------------------------------------------

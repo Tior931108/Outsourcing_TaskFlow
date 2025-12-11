@@ -3,6 +3,7 @@ package com.example.outsourcing_taskflow.common.entity;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,9 +17,10 @@ import java.time.LocalDateTime;
 //@AllArgsConstructor(access = AccessLevel.PRIVATE)  // Builder를 위해 필요
 public class Task extends BaseEntity {
 
+    // 속성
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 유저 PK
+    private Long id; // PK
 
     @Column(nullable = false)
     private String title; // 작업명
@@ -45,6 +47,7 @@ public class Task extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
 
+    // 생성자
     public Task(String title, String description, TaskStatusEnum status, TaskPriorityEnum priority, User assignee, LocalDateTime dueDate) {
         this.title = title;
         this.description = description;
@@ -52,6 +55,31 @@ public class Task extends BaseEntity {
         this.priority = priority;
         this.assignee = assignee;
         this.dueDate = dueDate;
+    }
+    
+    // 기능
+    public void update(UpdateTaskRequest request, User newAssignee) {
+        if (request.getTitle() != null) {
+            this.title = request.getTitle();
+        }
+        if (request.getDescription() != null) {
+            this.description = request.getDescription();
+        }
+        if (request.getStatus() != null) {
+            this.status = request.getStatus();  // Enum 그대로
+        }
+        if (request.getPriority() != null) {
+            this.priority = request.getPriority();  // Enum
+        }
+
+        // 담당자도 수정?
+        if (newAssignee != null) {
+            this.assignee = newAssignee;
+        }
+
+        if (request.getDueDate() != null) {
+            this.dueDate = request.getDueDate();
+        }
     }
 
 }
