@@ -2,14 +2,17 @@ package com.example.outsourcing_taskflow.domain.team.service;
 
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
+import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponse;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponse;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
+import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.response.*;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
+import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     /**
      * 팀 생성
@@ -188,7 +192,48 @@ public class TeamService {
     }
 
     /**
+     * 팀 멤버 추가
+     * @param teamId
+     * @param request
+     */
+    public CreateTeamMemberResponse addTeamMember(Long teamId, CreateTeamMemberRequest request) {
+
+        // 1. Team 엔티티 조회
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
+
+        // 2. User 엔티티 조회
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+
+        // 3. 이미 가입된 멤버인지 확인 (Member 엔티티 사용)
+        boolean exists = memberRepository.existsByTeamAndUser(team, user);
+        if (exists) {
+            throw new CustomException(EXIST_TEAM_MEMBER);
+        }
+
+        // 4. 팀 + 유저 = 멤버에 저장
+        Member newMember = new Member(team, user);
+        memberRepository.save(newMember);
+
+        // 5. 현재 팀 멤버 전체 조회
+        List<Member> updatedMembers = memberRepository.findAllByTeamId(teamId);
+
+        // 6. 멤버 DTO 리스트로 변환
+        List<TeamMemberResponse> memberResponses = new ArrayList<>();
+
+        for (Member member : updatedMembers) {
+            TeamMemberResponse response = new TeamMemberResponse(member.getUser());
+            memberResponses.add(response);
+        }
+
+        // 7. 응답 DTO 생성 및 반환 (팀 정보 + 업데이트된 멤버 목록 포함)
+        return new CreateTeamMemberResponse(team, memberResponses);
+    }
+
+    /**
      * 팀 멤버 조회
+     * @param teamId
      */
     @Transactional(readOnly = true)
     public List<TeamMemberResponse> getTeamMembers(Long teamId) {

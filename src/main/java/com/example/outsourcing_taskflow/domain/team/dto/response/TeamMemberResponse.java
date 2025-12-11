@@ -1,7 +1,6 @@
 package com.example.outsourcing_taskflow.domain.team.dto.response;
 
 import com.example.outsourcing_taskflow.common.entity.User;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
