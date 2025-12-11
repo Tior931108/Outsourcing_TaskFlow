@@ -2,6 +2,7 @@ package com.example.outsourcing_taskflow.domain.user.controller;
 
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.response.LoginResponse;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +19,17 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity<ApiResponse<String>> login(
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginUserRequest request
     ) {
         String token = userService.login(request);
 
-        ApiResponse<String> apiResponse = new ApiResponse<>(true, "로그인 성공", token);
+        // LoginResponse로 감싸기 ✅
+        LoginResponse loginResponse = new LoginResponse(token);
 
-        ResponseEntity<ApiResponse<String>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
-
-        return response;
+        // ApiResponse로 한 번 더 감싸기 ✅
+        return ResponseEntity.ok(
+                ApiResponse.success("로그인 성공", loginResponse)
+        );
     }
 }

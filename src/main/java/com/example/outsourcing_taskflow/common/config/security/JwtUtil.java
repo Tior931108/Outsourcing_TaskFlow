@@ -49,7 +49,7 @@ public class JwtUtil {
      */
     public String generateToken(Long userId, String username, UserRoleEnum role) {
         Date now = new Date();
-        return BEARER_PREFIX + Jwts.builder()
+        return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("role", role)
