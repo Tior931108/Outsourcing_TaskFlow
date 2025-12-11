@@ -2,17 +2,13 @@ package com.example.outsourcing_taskflow.domain.team.service;
 
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
-import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponse;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponse;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.response.CreateTeamResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamDetailResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.TeamListResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.response.UpdateTeamResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.response.*;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -66,7 +62,7 @@ public class TeamService {
     public TeamDetailResponse getTeamDetail(Long teamId) {
 
         // 1. Team 엔티티 조회
-        Team team = teamRepository.findByIdAndIsDeleted(teamId, IsDeleted.FALSE)
+        Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
 
         // 2. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
@@ -99,7 +95,7 @@ public class TeamService {
     public List<TeamListResponse> getTeamList() {
 
         // 1. 데이터 조회: Team 엔티티만 조회 (멤버 정보는 제외)
-        List<Team> teams = teamRepository.findAllByIsDeleted(IsDeleted.FALSE);
+        List<Team> teams = teamRepository.findAll();
 
         // 2. 최종 결과를 담을 빈 리스트를 준비
         List<TeamListResponse> teamResponseDtos = new ArrayList<>();
@@ -142,7 +138,7 @@ public class TeamService {
     public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
 
         // 1. Team 엔티티 조회
-        Team team = teamRepository.findByIdAndIsDeleted(teamId, IsDeleted.FALSE)
+        Team team = teamRepository.findById(teamId)
                 .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
 
         // 2. Team 수정 정보 업데이트
@@ -177,7 +173,7 @@ public class TeamService {
     public void deleteTeam(Long teamId) {
 
         // 1. Team 엔티티 조회
-        Team team = teamRepository.findByIdAndIsDeleted(teamId, IsDeleted.FALSE)
+        Team team = teamRepository.findById(teamId)
                 .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
 
         // 2. 팀에 멤버가 존재하면 삭제할 수 없는 로직 구현
@@ -188,6 +184,39 @@ public class TeamService {
         }
 
         // 3. Team 삭제
-        team.softDelete();
+        teamRepository.delete(team);
+    }
+
+    /**
+     * 팀 멤버 조회
+     */
+    @Transactional(readOnly = true)
+    public List<TeamMemberResponse> getTeamMembers(Long teamId) {
+
+        // 1. Team 존재 여부만 확인
+        boolean teamExists = teamRepository.existsById(teamId);
+
+        if (!teamExists) {
+            throw new CustomException(NOT_FOUND_TEAM);
+        }
+
+        // 2. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
+        List<Member> members = memberRepository.findAllByTeamId(teamId);
+
+        // 3. 최종 결과를 담을 빈 리스트를 준비
+        List<TeamMemberResponse> memberResponses = new ArrayList<>();
+
+        // 4. 멤버 엔티티 리스트를 순회하는 for 루프 시작
+        for (Member member : members) {
+
+            // 4-1. User 정보를 TeamMemberResponse DTO로 변환
+            TeamMemberResponse memberResponse = new TeamMemberResponse(member.getUser());
+
+            // 4-2. 변환된 DTO를 결과 리스트에 추가
+            memberResponses.add(memberResponse);
+        }
+
+        // 5. 최종 변환된 DTO 리스트를 반환
+        return memberResponses;
     }
 }
