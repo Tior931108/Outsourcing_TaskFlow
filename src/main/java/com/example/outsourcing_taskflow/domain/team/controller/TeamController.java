@@ -1,6 +1,7 @@
 package com.example.outsourcing_taskflow.domain.team.controller;
 
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
+import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.response.*;
@@ -32,7 +33,7 @@ public class TeamController {
 
         // 응답 반환
         return ResponseEntity
-                .status(HttpStatus.CREATED) // 💡 생성 시 201 Created 사용 권장
+                .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("팀이 생성되었습니다.", response));
     }
 
@@ -99,15 +100,33 @@ public class TeamController {
         );
     }
 
+
     /**
-     * 팀 멤버 조회
+     * 팀 멤버 추가 API
+     */
+    @PostMapping("/{teamId}/members")
+    public ResponseEntity<ApiResponse<CreateTeamMemberResponse>> addTeamMemberApi(@PathVariable Long teamId, @RequestBody CreateTeamMemberRequest request) {
+
+        // 핵심 비지니스 로직
+        CreateTeamMemberResponse response = teamService.addTeamMember(teamId, request);
+
+        // 응답 반환
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("팀 멤버가 추가되었습니다.", response));
+    }
+
+    /**
+     * 팀 멤버 조회 API
      */
     @GetMapping("/{teamId}/members")
-    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMember(
-            @PathVariable Long teamId
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success("팀 멤버 조회 성공", teamService.getTeamMembers(teamId)));
+    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMemberApi(@PathVariable Long teamId) {
+
+        // 핵심 비지니스 로직
+        List<TeamMemberResponse> teamMemberResponse = teamService.getTeamMembers(teamId);
+
+        // 응답 반환
+        return ResponseEntity.ok(
+                ApiResponse.success("팀 멤버 조회 성공", teamMemberResponse));
     }
 }
