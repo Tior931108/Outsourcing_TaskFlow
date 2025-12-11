@@ -8,12 +8,16 @@ import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -73,6 +77,7 @@ public class UserService {
     /**
      * 사용자 정보 조회
      */
+    @Transactional(readOnly = true)
     public GetUserResponse getUser(Long id, Long authUserId) {
 
         // 사용자를 찾을 수 없을 때
@@ -88,5 +93,27 @@ public class UserService {
         UserDto userDto = UserDto.from(user);
 
         return GetUserResponse.from(userDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetAllResponse> getAll() {
+
+        List<User> userList = userRepository.findAll();
+        List<GetAllResponse> responseList = new ArrayList<>();
+
+        for (User user: userList) {
+            GetAllResponse response = new GetAllResponse(
+                    user.getId(),
+                    user.getUserName(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getRole(),
+                    user.getCreatedAt()
+            );
+
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 }
