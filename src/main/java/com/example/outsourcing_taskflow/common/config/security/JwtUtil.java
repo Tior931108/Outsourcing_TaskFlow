@@ -1,4 +1,4 @@
-package com.example.outsourcing_taskflow.common.utils;
+package com.example.outsourcing_taskflow.common.config.security;
 
 import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import io.jsonwebtoken.Claims;
@@ -50,7 +50,7 @@ public class JwtUtil {
     public String generateToken(Long userId, String username, UserRoleEnum role) {
         Date now = new Date();
         return BEARER_PREFIX + Jwts.builder()
-                .claim("userId", userId)
+                .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(now)
@@ -93,7 +93,8 @@ public class JwtUtil {
     }
 
     public Long extractUserId(String token) {
-        return extractAllClaims(token).get("userId", Long.class);
+        String subject = extractAllClaims(token).getSubject();
+        return Long.parseLong(subject);
     }
 
 }

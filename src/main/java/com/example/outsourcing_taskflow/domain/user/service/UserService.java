@@ -3,11 +3,12 @@ package com.example.outsourcing_taskflow.domain.user.service;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.common.utils.JwtUtil;
+import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -67,5 +68,25 @@ public class UserService {
 
         return jwtUtil.generateToken(user.getId(), user.getUserName(), user.getRole());
 
+    }
+
+    /**
+     * 사용자 정보 조회
+     */
+    public GetUserResponse getUser(Long id, Long authUserId) {
+
+        // 사용자를 찾을 수 없을 때
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+        // 본인 id가 아닐 때
+        if (!id.equals(authUserId)) {
+            throw new CustomException(ErrorMessage.NEED_TO_VALID_TOKEN);
+        }
+
+        UserDto userDto = UserDto.from(user);
+
+        return GetUserResponse.from(userDto);
     }
 }
