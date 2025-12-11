@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -67,53 +68,60 @@ public class TaskService {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-    public PageResponse<GetTaskResponse> getAllTasks(int page, int size, String status, String search, Long assigneeId) {
+    public Page<GetTaskResponse> getAllTasks(int page, int size, String status, String search, Long assigneeId) {
 
         // page, size 유효성 검사
         if (page < 0 || size <= 0) {
-            // 지금 당장 페이징 관련 커스텀 예외가 없으니 임시로..
-            throw new IllegalArgumentException("페이지가 '0'미만이거나 사이즈가 '0'이하일 수 없습니다.");
+            throw new CustomException(ErrorMessage.NOT_CORRECT_PARAMETER);
         }
 
         // pageable : 페이징 정보를 담고 있는 객체
         Pageable pageable = PageRequest.of(page, size);
-        // JPA Specification : DB 쿼리의 조건을 간단히 Spec으로 작성하여 날릴 수 있게 해줌, Repository인터페이스에 선언해서 씀
-        //Specification<Task> spec = Specification.where(null); 다른 좋은 방법은 없나..
+        Page<Task> tasks;
         
         // 작업 상태 유효성 검사
+        TaskStatusEnum statusEnum = null;
         if (status != null) {
             try {
-                TaskStatusEnum statusEnum = TaskStatusEnum.valueOf(status.toUpperCase());   // toUpperCase() 사실상 불필요..?
+                statusEnum = TaskStatusEnum.valueOf(status.toUpperCase());   // toUpperCase() 사실상 불필요..?
 
             } catch (IllegalArgumentException e) {
                 throw new CustomException(ErrorMessage.NOT_CORRECT_PARAMETER);
-//                spec = spec.and((root, query, cb) ->
-//                        cb.equal(root.get("status"), statusEnum)
             }
         }
 
-        // 검색어
-        if (search != null && !search.isEmpty()) {
-//            spec = spec.and((root, query, cb) ->
-//                    cb.or(
-//                            cb.like(root.get("title"), "%" + search + "%"),
-//                            cb.like(root.get("description"), "%" + search + "%")
-//                    )
-//            );
+        // DB 쿼리 선택
+        if (statusEnum != null && assigneeId != null) {
+            // 상태 + 담당자
+            tasks = taskRepository.findByStatusAndAssigneeId(statusEnum, assigneeId, pageable);
+        } else if (statusEnum != null) {
+            // 상태만
+            tasks = taskRepository.findByStatus(statusEnum, pageable);
+        } else if (assigneeId != null) {
+            // 담당자만
+            tasks = taskRepository.findByAssigneeId(assigneeId, pageable);
+        } else { // 아무 조건 없이 전체 조회
+            tasks = taskRepository.findAll(pageable);
         }
 
-        // 담당자
-        if (assigneeId != null) {
-//            spec = spec.and((root, query, cb) ->
-//                    cb.equal(root.get("assignee").get("id"), assigneeId)
-//            );
+        // search
+        if (search != null && !search.isEmpty()) {
+            String keyword = search.toLowerCase();
+
+            // 작업의 제목, 내용에 검색 키워드 일치 시 리스트에 담기
+            var filteredList = tasks.getContent().stream()
+                    .filter(task ->
+                            (task.getTitle() != null && task.getTitle().toLowerCase().contains(keyword)) ||
+                                    (task.getDescription() != null && task.getDescription().toLowerCase().contains(keyword))
+                    )
+                    .toList();
+
+            // PageImpl 로 다시 감싸기
+            tasks = new PageImpl<>(filteredList, pageable, filteredList.size());
         }
         
-        // 조회
-        Page<Task> result = taskRepository.findAll(pageable);
-        
-        // 반환
-        return ?;
+        // DTO 매핑
+        return tasks.map(GetTaskResponse::from);
 
     }
 

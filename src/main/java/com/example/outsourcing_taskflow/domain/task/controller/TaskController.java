@@ -8,6 +8,7 @@ import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse
 import com.example.outsourcing_taskflow.domain.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,8 +41,8 @@ public class TaskController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long assigneeId
     ) {
-        return taskService.getAllTasks(page, size, status, search, assigneeId);
+        Page<GetTaskResponse> result = taskService.getAllTasks(page, size, status, search, assigneeId);
+        return PageResponse.success("작업 목록 조회 성공", result);
     }
-
 
 }
