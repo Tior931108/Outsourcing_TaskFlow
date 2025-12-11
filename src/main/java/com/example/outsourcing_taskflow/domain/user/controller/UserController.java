@@ -3,10 +3,13 @@ package com.example.outsourcing_taskflow.domain.user.controller;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
+import com.sun.net.httpserver.HttpsServer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -73,5 +76,51 @@ public class UserController {
         ResponseEntity<ApiResponse<List<GetAllResponse>>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
         return response;
+    }
+
+
+    /**
+     * 회원 탈퇴
+     */
+    @DeleteMapping("/api/users/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+        Long authUserId = authUserDto.getId();
+
+        userService.deleteUser(id, authUserId);
+
+        ApiResponse<Void> apiResponse = new ApiResponse<>(true, "회원 탈퇴가 완료되었습니다.", null);
+
+        ResponseEntity<ApiResponse<Void>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        return response;
+    }
+
+
+    /**
+     * 비밀번호 확인
+     */
+    @PostMapping("/api/users/verify-password")
+    public ResponseEntity<ApiResponse<VerifyPasswordResponse>> verifyPassword(
+            @RequestBody VerifyPasswordRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+        Long authUserId = authUserDto.getId();
+
+        VerifyPasswordResponse verifyPassword = userService.verifyPassword(request, authUserId);
+
+        if (verifyPassword.isValid()) {
+            ApiResponse<VerifyPasswordResponse> apiResponse = new ApiResponse<>(true, "비밀번호가 확인되었습니다.", verifyPassword);
+            ResponseEntity<ApiResponse<VerifyPasswordResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+            return response;
+
+        } else {
+            ApiResponse<VerifyPasswordResponse> apiResponse = new ApiResponse<>(false, "비밀번호가 올바르지 않습니다.", verifyPassword);
+            ResponseEntity<ApiResponse<VerifyPasswordResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+            return response;
+        }
+
     }
 }

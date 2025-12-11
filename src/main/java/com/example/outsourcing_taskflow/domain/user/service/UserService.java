@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.user.service;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
@@ -7,9 +8,11 @@ import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -115,5 +119,43 @@ public class UserService {
         }
 
         return responseList;
+    }
+
+
+    /**
+     * 회원 탈퇴
+     */
+    public void deleteUser(Long id, Long authUserId) {
+
+        // 다른 사용자 탈퇴 시도
+        if (!id.equals(authUserId)) {
+            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
+        }
+
+        userRepository.deleteById(id);
+    }
+
+
+    /**
+     * 비밀번호 확인
+     */
+    public VerifyPasswordResponse verifyPassword(VerifyPasswordRequest request, Long authUserId) {
+
+        User user = userRepository.findById(authUserId).orElseThrow(
+                () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+
+        VerifyPasswordResponse verifyPasswordResponse = new VerifyPasswordResponse();
+
+        // 잘못된 비밀번호
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            verifyPasswordResponse.setValid(false);
+        } else {
+            verifyPasswordResponse.setValid(true);
+        }
+
+
+        return verifyPasswordResponse;
     }
 }
