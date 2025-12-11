@@ -1,4 +1,6 @@
 package com.example.outsourcing_taskflow.common.filter;
+import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
+import com.example.outsourcing_taskflow.common.exception.CustomException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -27,11 +29,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         /**
-         * 로그인 인증 제외
+         * 로그인, 회원가입 인증 제외 - 화이트리스트 구현하기
          */
         String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/api/auth/login")) {
+        if (requestURI.equals("/api/auth/login") || (requestURI.equals("/api/users") && request.getMethod().equals("POST"))) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,8 +46,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authorization == null || authorization.isBlank()) {
             log.info("JWT 토큰이 필요합니다.");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 필요합니다.");
-            return;
+            throw new CustomException(ErrorMessage.NEED_TO_VALID_TOKEN);
+
+//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 필요합니다.");
+//            return;
         }
 
 
@@ -63,6 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
         /**
          * 토큰 값 복호화
          */
+        Long userId = jwtUtil.extractUserId(jwt);
         String username = jwtUtil.extractUsername(jwt);
         String role = jwtUtil.extractRole(jwt);
         UserRoleEnum userRoleEnum = UserRoleEnum.valueOf(role);
@@ -71,6 +76,11 @@ public class JwtFilter extends OncePerRequestFilter {
         /**
          * User 생성 및 SecurityContextHolder에 Authentication 객체 생성
          */
+
+        // CustomUserDetails 커스텀 해보기
+        // 태호님 뉴스피드 참고하기
+        // UsernamePasswordAuthenticationToken 바로 넣지 말고, Authentication 객체로 받아서 넣어주기  -> SecurityContextHolder에
+
         User user = new User(username, "", List.of(userRoleEnum::getRole));
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
         filterChain.doFilter(request, response);

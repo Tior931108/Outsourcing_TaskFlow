@@ -4,9 +4,14 @@ import com.example.outsourcing_taskflow.common.entity.User;
 import jakarta.validation.constraints.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUserName(String userName);
 
     boolean existsByEmail(@Email(message = "올바른 이메일 형식이 아닙니다.") String email);
+
+    Optional<User> findByUserName(String userName);
 }

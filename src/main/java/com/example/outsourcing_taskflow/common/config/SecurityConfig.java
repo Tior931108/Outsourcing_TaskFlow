@@ -4,6 +4,7 @@ import com.example.outsourcing_taskflow.common.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,8 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, SecurityContextHolderAwareRequestFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll()
-//                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .anyRequest().authenticated()   // 인가 - 위의 도메인 주소가 아니면 통과 x (출입 권한이 있는지 확인, 체크)
                 )
                 .build();
     }
