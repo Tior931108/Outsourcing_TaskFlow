@@ -4,13 +4,17 @@ import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
+import com.example.outsourcing_taskflow.domain.comment.model.response.ReadCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.repository.CommentRepository;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,21 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+
+    @Transactional
+    public Page<ReadCommentResponse> getComments(Long taskId, Pageable pageable) {
+        // 404 : 작업 ID 존재 여부
+        if (!taskRepository.existsById(taskId)) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
+        // DTO projection으로 직접 페이징 조회 (필요한 필드만)
+        return commentRepository.findCommentDtosByTaskId(
+                taskId,
+                IsDeleted.FALSE,
+                pageable
+        );
+    }
 
     @Transactional
     public CreateCommentResponse createComment(Long taskId, CreateCommentRequest request, Long userId) {
@@ -75,4 +94,6 @@ public class CommentService {
         }
         return new Comment(content, user, task);
     }
+
+
 }
