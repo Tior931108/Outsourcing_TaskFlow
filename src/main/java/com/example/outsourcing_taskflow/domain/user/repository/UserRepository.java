@@ -27,5 +27,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
         """)
     List<User> searchByKeyword(@Param("keyword") String keyword);
 
-    Long id(Long id);
 }
