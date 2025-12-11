@@ -29,7 +29,7 @@ public class ActivityLogService {
 
 // - Methods
     // - Log
-    @Transactional
+    @Transactional(readOnly = true)
     public void log(ActivityType type,
                     User user,
                     Task task,
@@ -40,7 +40,7 @@ public class ActivityLogService {
         activityLogRepository.save(log);
     }
     // - Get All ActivityLogs By Conditions
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<GetActivityLogResponse> getActivityLogs(
             int page, int size, String type, Long taskId, LocalDateTime startDate, LocalDateTime endDate) {
         // - Create Pageable
