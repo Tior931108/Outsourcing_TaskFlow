@@ -3,6 +3,7 @@ package com.example.outsourcing_taskflow.common.entity;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,5 +37,19 @@ public class Comment extends BaseEntity{
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
+
+    // 통합 생성자 (parent는 선택적)
+    public Comment(String content, User user, Task task, Comment parent) {
+        this.content = content;
+        this.user = user;
+        this.task = task;
+        this.parent = parent;  // null 가능
+        this.isDeleted = IsDeleted.FALSE;
+    }
+
+    // 일반 댓글용 편의 생성자
+    public Comment(String content, User user, Task task) {
+        this(content, user, task, null);
+    }
 
 }
