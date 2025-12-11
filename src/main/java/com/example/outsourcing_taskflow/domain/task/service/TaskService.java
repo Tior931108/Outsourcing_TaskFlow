@@ -14,6 +14,7 @@ import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,6 +28,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
+// ---------------------------------------------------------------------------------------------------------------------
     public CreateTaskResponse createTask(CreateTaskRequest request) {
 
         // 400 Bad Request: 필수 필드 누락
@@ -52,6 +54,8 @@ public class TaskService {
         return CreateTaskResponse.from(savedTask);
     }
 
+// ---------------------------------------------------------------------------------------------------------------------
+
     public GetTaskResponse getTask(Long taskId) {
 
         // 작업 가져오기 + 404 Not Found: 작업을 찾을 수 없음
@@ -60,6 +64,8 @@ public class TaskService {
 
         return GetTaskResponse.from(task);
     }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
     public PageResponse<GetTaskResponse> getAllTasks(int page, int size, String status, String search, Long assigneeId) {
 
@@ -80,22 +86,37 @@ public class TaskService {
                 TaskStatusEnum statusEnum = TaskStatusEnum.valueOf(status.toUpperCase());   // toUpperCase() 사실상 불필요..?
 
             } catch (IllegalArgumentException e) {
-                throw new CustomException(ErrorMessage.NOT_CORRECT_TASK_STATUS);
+                throw new CustomException(ErrorMessage.NOT_CORRECT_PARAMETER);
+//                spec = spec.and((root, query, cb) ->
+//                        cb.equal(root.get("status"), statusEnum)
             }
         }
 
         // 검색어
-
+        if (search != null && !search.isEmpty()) {
+//            spec = spec.and((root, query, cb) ->
+//                    cb.or(
+//                            cb.like(root.get("title"), "%" + search + "%"),
+//                            cb.like(root.get("description"), "%" + search + "%")
+//                    )
+//            );
+        }
 
         // 담당자
-        
+        if (assigneeId != null) {
+//            spec = spec.and((root, query, cb) ->
+//                    cb.equal(root.get("assignee").get("id"), assigneeId)
+//            );
+        }
         
         // 조회
-        
+        Page<Task> result = taskRepository.findAll(pageable);
         
         // 반환
-        return PageResponse.success("작업 목록 조회 성공", responsePage);
+        return ?;
 
     }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 }
