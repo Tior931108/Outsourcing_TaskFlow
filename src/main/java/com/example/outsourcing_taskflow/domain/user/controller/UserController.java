@@ -3,13 +3,14 @@ package com.example.outsourcing_taskflow.domain.user.controller;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
-import com.sun.net.httpserver.HttpsServer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,27 @@ public class UserController {
 
 
     /**
+     * 사용자 정보 수정
+     */
+    @PutMapping("/api/users/{id}")
+    public ResponseEntity<ApiResponse<UpdateUserResponse>> updateUser(
+            @PathVariable Long id,
+            @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+        Long authUserID = authUserDto.getId();
+
+        UpdateUserResponse updateUser = userService.updateUser(id, request, authUserID);
+
+        ApiResponse<UpdateUserResponse> apiResponse = new ApiResponse<>(true, "사용자 정보가 수정되었습니다.", updateUser);
+
+        ResponseEntity<ApiResponse<UpdateUserResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        return response;
+    }
+
+
+    /**
      * 회원 탈퇴
      */
     @DeleteMapping("/api/users/{id}")
@@ -124,3 +146,4 @@ public class UserController {
 
     }
 }
+
