@@ -8,11 +8,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUserName(String userName);
 
     boolean existsByEmail(@Email(message = "올바른 이메일 형식이 아닙니다.") String email);
+
+    Optional<User> findByUserName(String userName);
 
     // - Search By Keyword
     @Query("""
@@ -21,4 +26,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
         where lower(u.name) like lower(concat('%', :keyword, '%'))
         """)
     List<User> searchByKeyword(@Param("keyword") String keyword);
+
 }
