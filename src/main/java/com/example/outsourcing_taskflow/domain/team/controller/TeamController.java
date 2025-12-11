@@ -129,4 +129,19 @@ public class TeamController {
         return ResponseEntity.ok(
                 ApiResponse.success("팀 멤버 조회 성공", teamMemberResponse));
     }
+
+    /**
+     * 팀 멤버 제거 API
+     */
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTeamMemberApi(@PathVariable Long teamId, @PathVariable Long userId) {
+
+        // 핵심 비지니스 로직
+        teamService.deleteTeamMember(teamId, userId);
+
+        // 응답 반환
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("팀 멤버가 제거되었습니다.", null));
+    }
 }
