@@ -132,21 +132,21 @@ public class UserService {
      */
     public UpdateUserResponse updateUser(Long id, UpdateUserRequest request, Long authUserID) {
 
-        // 다른 사용자 정보 수정 시도
-        if (!id.equals(authUserID)) {
-            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
-        }
-
-        User user = userRepository.findById(id).orElseThrow(
+        User user = userRepository.findById(authUserID).orElseThrow(
                 () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
         );
+
+        // 다른 사용자 정보 수정 시도
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
+        }
 
         // 중복된 이메일
         if (user.getEmail().equals(request.getEmail())) {
             throw new CustomException(ErrorMessage.EXIST_EMAIL);
         }
 
-        user.update(request.getName(), request.getEmail(), request.getPassword());
+        user.update(request.getName(), request.getEmail(), passwordEncoder.encode(request.getPassword()));
 
         UserDto userDto = UserDto.from(user);
 
@@ -164,7 +164,7 @@ public class UserService {
             throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
         }
 
-        userRepository.deleteById(id);
+        userRepository.deleteById(authUserId);
     }
 
 
