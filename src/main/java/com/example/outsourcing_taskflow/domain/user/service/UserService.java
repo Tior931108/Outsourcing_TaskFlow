@@ -3,6 +3,7 @@ package com.example.outsourcing_taskflow.domain.user.service;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
@@ -35,9 +36,13 @@ public class UserService {
 
     /**
      * 회원가입
-     * @param request
      */
     public CreateUserResponse createUser(CreateUserRequest request) {
+
+        // IsDeleted.TRUE 회원가입 불가
+        if (userRepository.existsByUserName(request.getUsername())) {
+            throw new IllegalArgumentException("탈퇴한 회원 - 재가입 불가");
+        }
 
         // 중복된 사용자명 예외 처리
         if (userRepository.existsByUserName(request.getUsername())) {
@@ -75,6 +80,11 @@ public class UserService {
             throw new CustomException(ErrorMessage.NOT_MATCH_UNAUTHORIZED);
         }
 
+        // 탈퇴한 회원은 로그인 불가
+        if (user.getIsDeleted().equals(IsDeleted.TRUE)) {
+            throw new IllegalArgumentException("탈퇴한 회원 - 로그인 불가");
+        }
+
         return jwtUtil.generateToken(user.getId(), user.getUserName(), user.getRole());
 
     }
@@ -89,6 +99,11 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
         );
+
+        // 탈퇴한 회원은 정보 조회 불가
+        if (user.getIsDeleted().equals(IsDeleted.TRUE)) {
+            throw new IllegalArgumentException("탈퇴한 회원 - 사용자 정보 조회 불가");
+        }
 
         // 본인 id가 아닐 때
         if (!id.equals(authUserId)) {
@@ -111,16 +126,20 @@ public class UserService {
         List<GetAllResponse> responseList = new ArrayList<>();
 
         for (User user: userList) {
-            GetAllResponse response = new GetAllResponse(
-                    user.getId(),
-                    user.getUserName(),
-                    user.getEmail(),
-                    user.getName(),
-                    user.getRole(),
-                    user.getCreatedAt()
-            );
 
-            responseList.add(response);
+            // 탈퇴.FALSE인 유저만 리스트에 추가
+            if (user.getIsDeleted().equals(IsDeleted.FALSE)) {
+                GetAllResponse response = new GetAllResponse(
+                        user.getId(),
+                        user.getUserName(),
+                        user.getEmail(),
+                        user.getName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                );
+
+                responseList.add(response);
+            }
         }
 
         return responseList;
@@ -164,7 +183,16 @@ public class UserService {
             throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
         }
 
-        userRepository.deleteById(authUserId);
+        User user = userRepository.findById(authUserId).orElseThrow(
+                () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+        // 탈퇴한 회원은 재탈퇴 불가
+        if (user.getIsDeleted().equals(IsDeleted.TRUE)) {
+            throw new IllegalArgumentException("이미 탈퇴한 회원");
+        }
+
+        user.softDelete(IsDeleted.TRUE);
     }
 
 
@@ -177,7 +205,6 @@ public class UserService {
                 () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
         );
 
-
         VerifyPasswordResponse verifyPasswordResponse = new VerifyPasswordResponse();
 
         // 잘못된 비밀번호
@@ -186,7 +213,6 @@ public class UserService {
         } else {
             verifyPasswordResponse.setValid(true);
         }
-
 
         return verifyPasswordResponse;
     }
