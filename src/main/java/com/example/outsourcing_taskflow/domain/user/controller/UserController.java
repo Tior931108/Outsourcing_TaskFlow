@@ -4,6 +4,7 @@ import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
 import jakarta.validation.Valid;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -51,6 +54,23 @@ public class UserController {
         ApiResponse<GetUserResponse> apiResponse = new ApiResponse<>(true, "사용자 정보 조회 성공", getUser);
 
         ResponseEntity<ApiResponse<GetUserResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        return response;
+    }
+
+
+    /**
+     * 사용자 목록 조회
+     */
+    @GetMapping("/api/users")
+    public ResponseEntity<ApiResponse<List<GetAllResponse>>> getAll(
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+        List<GetAllResponse> responseList = userService.getAll();
+
+        ApiResponse<List<GetAllResponse>> apiResponse = new ApiResponse<>(true, "사용자 목록 조회 성공", responseList);
+
+        ResponseEntity<ApiResponse<List<GetAllResponse>>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
         return response;
     }
