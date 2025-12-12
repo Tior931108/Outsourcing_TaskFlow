@@ -124,18 +124,19 @@ public class UserService {
 
         List<User> userList = userRepository.findAll();
         List<GetAllResponse> responseList = new ArrayList<>();
-
         for (User user: userList) {
+
+            UserDto userDto = UserDto.from(user);
 
             // 탈퇴.FALSE인 유저만 리스트에 추가
             if (user.getIsDeleted().equals(IsDeleted.FALSE)) {
                 GetAllResponse response = new GetAllResponse(
-                        user.getId(),
-                        user.getUserName(),
-                        user.getEmail(),
-                        user.getName(),
-                        user.getRole(),
-                        user.getCreatedAt()
+                        userDto.getId(),
+                        userDto.getUserName(),
+                        userDto.getEmail(),
+                        userDto.getName(),
+                        userDto.getRole(),
+                        userDto.getCreatedAt()
                 );
 
                 responseList.add(response);
