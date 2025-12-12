@@ -1,11 +1,12 @@
 package com.example.outsourcing_taskflow.domain.team.service;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponse;
-import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponse;
+import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponseDto;
+import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponseDto;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
 import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
@@ -14,275 +15,213 @@ import com.example.outsourcing_taskflow.domain.team.dto.response.*;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.example.outsourcing_taskflow.common.enums.ErrorMessage.*;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class TeamService {
 
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
 
-    /**
-     * 팀 생성
-     * @param createTeamRequest
-     */
+    // 팀 생성
     public CreateTeamResponse createTeam(CreateTeamRequest createTeamRequest) {
 
-        // 1. 데이터 준비
         String name = createTeamRequest.getName();
         String description = createTeamRequest.getDescription();
 
-        // 2. 팀 이름 중복 확인
-        teamRepository.findByTeamName(name)
+        // 팀 이름 중복 확인
+        teamRepository.findByTeamNameAndIsDeletedFalse(name)
                 .ifPresent(team -> {
-                    throw new CustomException(EXIST_TEAM_NAME);
-                });
+                    throw new CustomException(EXIST_TEAM_NAME);});
 
-        // 3. 팀 엔티티 생성
         Team newTeam = new Team(name, description);
 
-        // 4. 레포지터리에 저장
         Team savedTeam = teamRepository.save(newTeam);
 
-        // 5. dto 생성
         CreateTeamResponse response = new CreateTeamResponse(savedTeam);
 
         return response;
     }
 
-    /**
-     * 팀 상세 조회
-     * @param teamId
-     */
+    // 팀 상세 조회
+    @Transactional(readOnly = true)
     public TeamDetailResponse getTeamDetail(Long teamId) {
 
-        // 1. Team 엔티티 조회
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
 
-        // 2. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
-        List<Member> members = memberRepository.findAllByTeamId(teamId);
+        List<Member> members = memberRepository.findAllByTeamIdWithUser(teamId);
+        log.info("조회된 멤버 수: {}", members.size());
 
-        // 3. 멤버 DTO를 담을 빈 리스트를 준비
-        List<MemberDetailReasponse> memberResponses = new ArrayList<>();
 
-        // 4. 멤버 엔티티 리스트를 순회하는 for 루프 시작
+        List<MemberDetailReasponseDto> memberResponses = new ArrayList<>();
+
         for (Member member : members) {
-
-            // 4-1. MemberDetailReasponse로 변환
-            MemberDetailReasponse memberResponse = new MemberDetailReasponse(member.getUser());
-            // 4-2. 변환된 DTO를 memberResponses 리스트에 추가
+            MemberDetailReasponseDto memberResponse = new MemberDetailReasponseDto(member.getUser());
             memberResponses.add(memberResponse);
         }
 
-        // 5. 최종 TeamDetailResponse를 생성
         TeamDetailResponse teamDetailResponse = new TeamDetailResponse(team, memberResponses);
 
-        // 6. DTO로 변환하여 반환
         return teamDetailResponse;
     }
 
 
-    /**
-     * 팀 전체 조회
-     */
+    // 팀 목록 조회
     @Transactional(readOnly = true)
     public List<TeamListResponse> getTeamList() {
 
-        // 1. 데이터 조회: Team 엔티티만 조회 (멤버 정보는 제외)
         List<Team> teams = teamRepository.findAll();
 
-        // 2. 최종 결과를 담을 빈 리스트를 준비
+        List<Member> allMembersWithUsers = memberRepository.findAllWithUser();
+
+        // 인 메모리 맵
+        Map<Long, List<Member>> membersByTeamId = allMembersWithUsers.stream()
+                .collect(Collectors.groupingBy(member -> member.getTeam().getId()));
+
         List<TeamListResponse> teamResponseDtos = new ArrayList<>();
 
-        // 3. 조회된 'teams' 리스트를 순회하는 외부 for 루프를 시작
         for (Team team : teams) {
+            List<Member> members = membersByTeamId.getOrDefault(team.getId(), Collections.emptyList());
 
-            // 4. MemberRepository를 사용하여 현재 팀의 ID로 멤버 정보를 별도 조회
-            List<Member> members = memberRepository.findAllByTeamId(team.getId());
+            List<MemberListResponseDto> memberDtos = members.stream()
+                    .map(member -> new MemberListResponseDto(member.getUser()))
+                    .collect(Collectors.toList());
 
-            // 5. 멤버 DTO를 담을 빈 리스트를 준비
-            List<MemberListResponse> memberDtos = new ArrayList<>();
-
-            // 6. 멤버 엔티티 리스트를 순회하는 내부 for 루프
-            for (Member member : members) {
-
-                // 6-1. 개별 Member 엔티티를 MemberListDto로 변환
-                MemberListResponse memberDto = new MemberListResponse(member.getUser());
-
-                // 6-2. 변환된 DTO를 memberDtos 리스트에 추가
-                memberDtos.add(memberDto);
-            }
-
-            // 7. 최종 TeamListResponseDto를 생성
             TeamListResponse teamResponseDto = new TeamListResponse(team, memberDtos);
-
-            // 8. 생성된 팀 DTO를 최종 결과 리스트에 추가
             teamResponseDtos.add(teamResponseDto);
         }
 
-        // 9. 최종 변환된 DTO 리스트를 반환
         return teamResponseDtos;
     }
 
-    /**
-     * 팀 수정
-     * @param teamId
-     * @param request
-     */
-    public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
+    // 팀 수정
+    public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request, AuthUserDto authUserDto) {
 
-        // 1. Team 엔티티 조회
+        // 권한 검증
+        if (!"ADMIN".equals(authUserDto.getRole())) {
+            throw new CustomException(NOT_MODIFY_AUTHORIZED);
+        }
+
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
 
-        // 2. Team 수정 정보 업데이트
         team.update(request.getName(), request.getDescription());
 
-        // 3. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
-        List<Member> members = memberRepository.findAllByTeamId(teamId);
+        List<Member> members = memberRepository.findAllByTeamIdWithUser(teamId);
 
-        // 4. 멤버 DTO를 담을 빈 리스트를 준비
-        List<MemberDetailReasponse> memberResponses = new ArrayList<>();
+        List<MemberDetailReasponseDto> memberResponses = new ArrayList<>();
 
-        // 5. 멤버 엔티티 리스트를 순회하는 for 루프 시작
         for (Member member : members) {
-
-            // 5-1. MemberDetailReasponse로 변환
-            MemberDetailReasponse memberResponse = new MemberDetailReasponse(member.getUser());
-            // 5-2. 변환된 DTO를 memberResponses 리스트에 추가
+            MemberDetailReasponseDto memberResponse = new MemberDetailReasponseDto(member.getUser());
             memberResponses.add(memberResponse);
         }
 
-        // 6. 최종 UpdateTeamResponse 생성
         UpdateTeamResponse updateTeamResponse = new UpdateTeamResponse(team, memberResponses);
 
-        // 7. DTO로 변환하여 반환
         return updateTeamResponse;
     }
 
-    /**
-     * 팀 삭제
-     * @param teamId
-     */
+    // 팀 삭제
     public void deleteTeam(Long teamId) {
 
-        // 1. Team 엔티티 조회
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(()-> new CustomException(NOT_FOUND_TEAM));
 
-        // 2. 팀에 멤버가 존재하면 삭제할 수 없는 로직 구현
+        // 팀에 멤버가 존재하면 삭제할 수 없음
         boolean hasMembers= memberRepository.existsByTeamId(teamId);
 
         if (hasMembers) {
             throw new CustomException(EXIST_TEAM_MEMBER_NOT_DELETE);
         }
 
-        // 3. Team 삭제
-        teamRepository.delete(team);
+        team.softDelete();
     }
 
-    /**
-     * 팀 멤버 추가
-     * @param teamId
-     * @param request
-     */
+    // 팀 멤버 추가
     public CreateTeamMemberResponse addTeamMember(Long teamId, CreateTeamMemberRequest request) {
 
-        // 1. Team 엔티티 조회
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
 
-        // 2. User 엔티티 조회
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-        // 3. 이미 가입된 멤버인지 확인 (Member 엔티티 사용)
+        // 이미 가입된 멤버인지 확인
         boolean exists = memberRepository.existsByTeamAndUser(team, user);
         if (exists) {
             throw new CustomException(EXIST_TEAM_MEMBER);
         }
 
-        // 4. 팀 + 유저 = 멤버에 저장
+        // 팀 + 유저 = 멤버에 저장
         Member newMember = new Member(team, user);
         memberRepository.save(newMember);
 
-        // 5. 현재 팀 멤버 전체 조회
-        List<Member> updatedMembers = memberRepository.findAllByTeamId(teamId);
+        // 현재 팀 멤버 전체 조회
+        List<Member> updatedMembers = memberRepository.findAllByTeamIdWithUser(teamId);
 
-        // 6. 멤버 DTO 리스트로 변환
-        List<TeamMemberResponse> memberResponses = new ArrayList<>();
+        List<TeamMemberResponseDto> memberResponses = new ArrayList<>();
 
         for (Member member : updatedMembers) {
-            TeamMemberResponse response = new TeamMemberResponse(member.getUser());
+            TeamMemberResponseDto response = new TeamMemberResponseDto(member.getUser());
             memberResponses.add(response);
         }
 
-        // 7. 응답 DTO 생성 및 반환 (팀 정보 + 업데이트된 멤버 목록 포함)
         return new CreateTeamMemberResponse(team, memberResponses);
     }
 
-    /**
-     * 팀 멤버 조회
-     * @param teamId
-     */
+    // 팀 멤버 조회
     @Transactional(readOnly = true)
-    public List<TeamMemberResponse> getTeamMembers(Long teamId) {
+    public List<TeamMemberResponseDto> getTeamMembers(Long teamId) {
 
-        // 1. Team 존재 여부만 확인
-        boolean teamExists = teamRepository.existsById(teamId);
+        boolean exists = teamRepository.existsById(teamId);
 
-        if (!teamExists) {
+        if (!exists) {
             throw new CustomException(NOT_FOUND_TEAM);
         }
 
-        // 2. MemberRepository를 사용하여 해당 팀의 모든 멤버 정보와 User 정보를 조회
-        List<Member> members = memberRepository.findAllByTeamId(teamId);
+        List<Member> members = memberRepository.findAllByTeamIdWithUser(teamId);
 
-        // 3. 최종 결과를 담을 빈 리스트를 준비
-        List<TeamMemberResponse> memberResponses = new ArrayList<>();
+        List<TeamMemberResponseDto> memberResponses = new ArrayList<>();
 
-        // 4. 멤버 엔티티 리스트를 순회하는 for 루프 시작
         for (Member member : members) {
-
-            // 4-1. User 정보를 TeamMemberResponse DTO로 변환
-            TeamMemberResponse memberResponse = new TeamMemberResponse(member.getUser());
-
-            // 4-2. 변환된 DTO를 결과 리스트에 추가
+            TeamMemberResponseDto memberResponse = new TeamMemberResponseDto(member.getUser());
             memberResponses.add(memberResponse);
         }
 
-        // 5. 최종 변환된 DTO 리스트를 반환
         return memberResponses;
     }
 
-    /**
-     * 팀 멤버 삭제
-     */
-    public void deleteTeamMember(Long teamId, Long userId) {
+    // 팀 멤버 삭제
+    public void deleteTeamMember(Long teamId, Long userId, AuthUserDto authUserDto) {
 
-        // 1. Team 엔티티 조회
+        // 권한 검증
+        if (!"ADMIN".equals(authUserDto.getRole())) {
+            throw new CustomException(NOT_REMOVE_AUTHORIZED);
+        }
+
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM));
 
-        // 2. User 엔티티 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
 
-        // 3. Member 엔티티 조회
         Member member = memberRepository.findByTeamAndUser(team, user)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_TEAM_MEMBER));
 
-        // 4. Member 제거
         memberRepository.delete(member);
     }
 }
