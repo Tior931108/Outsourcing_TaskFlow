@@ -232,18 +232,22 @@ public class UserService {
 
         for (User user: userList) {
 
-            UserDto userDto = UserDto.from(user);
+            // 탈퇴한 사용자 제외
+            if (user.getIsDeleted().equals(IsDeleted.FALSE)) {
 
-            AvailableUserResponse response = new AvailableUserResponse(
-                    userDto.getId(),
-                    userDto.getUserName(),
-                    userDto.getEmail(),
-                    userDto.getName(),
-                    userDto.getRole(),
-                    userDto.getCreatedAt()
-            );
+                UserDto userDto = UserDto.from(user);
 
-            responseList.add(response);
+                AvailableUserResponse response = new AvailableUserResponse(
+                        userDto.getId(),
+                        userDto.getUserName(),
+                        userDto.getEmail(),
+                        userDto.getName(),
+                        userDto.getRole(),
+                        userDto.getCreatedAt()
+                );
+
+                responseList.add(response);
+            }
         }
 
         return responseList;
