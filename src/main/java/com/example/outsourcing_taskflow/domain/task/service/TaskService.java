@@ -10,9 +10,11 @@ import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskStatusResponse;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -207,6 +209,40 @@ public class TaskService {
 
         task.softDelete();
 
+    }
+
+    public UpdateTaskStatusResponse updateTaskStatus(Long taskId, UpdateTaskStatusRequest request) {
+
+        // 작업 조회 + 404 Not Found: 작업을 찾을 수 없음
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
+
+        // 논리 삭제된 작업은 제외
+//        if (task.isDeleted()) {
+        if (task.getIsDeleted() == IsDeleted.TRUE) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
+        // request의 status값이 null이거나 _TODO/IN_PROGRESS/DONE 이 아닌 경우
+        // null의 경우 서비스단에서 잡아서 처리가능, 하지만 잘못된 Enum값이 서비스로 들어올 경우는 없음(그 전에 처리가 되므로, 이 부분을 따로 설정하려면 전역에러핸들링 필요)
+        // 400 Bad Request: 잘못된 상태 값
+        if (request.getStatus() == null) {
+            throw new CustomException(ErrorMessage.NOT_CORRECT_TASK_STATUS);
+        }
+
+        // 상태 변경: _TODO → IN_PROGRESS → DONE 순차적 변경만 허용
+        TaskStatusEnum currentStatus = task.getStatus();
+        TaskStatusEnum newStatus = request.getStatus();
+        boolean isValidTransition =
+                (currentStatus == TaskStatusEnum.TODO && newStatus == TaskStatusEnum.IN_PROGRESS) ||
+                        (currentStatus == TaskStatusEnum.IN_PROGRESS && newStatus == TaskStatusEnum.DONE);
+        if (!isValidTransition) {
+            throw new CustomException(ErrorMessage.NOT_CORRECT_TASK_STATUS);
+        }
+
+        task.updateStatus(newStatus);
+
+        return UpdateTaskStatusResponse.from(task);
     }
 
 // ---------------------------------------------------------------------------------------------------------------------
