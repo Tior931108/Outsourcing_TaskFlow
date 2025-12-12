@@ -6,6 +6,7 @@ import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponseDto;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponseDto;
@@ -209,8 +210,12 @@ public class TeamService {
         List<TeamMemberResponseDto> memberResponses = new ArrayList<>();
 
         for (Member member : members) {
-            TeamMemberResponseDto memberResponse = new TeamMemberResponseDto(member.getUser());
-            memberResponses.add(memberResponse);
+
+            // 탈퇴한 멤버 제외하고, 팀의 멤버 조회
+            if (member.getUser().getIsDeleted().equals(IsDeleted.FALSE)) {
+                TeamMemberResponseDto memberResponse = new TeamMemberResponseDto(member.getUser());
+                memberResponses.add(memberResponse);
+            }
         }
 
         return memberResponses;
