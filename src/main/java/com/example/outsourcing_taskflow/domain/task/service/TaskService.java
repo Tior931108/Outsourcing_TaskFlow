@@ -212,7 +212,9 @@ public class TaskService {
 
     }
 
-    public UpdateTaskStatusResponse updateTaskStatus(Long taskId, UpdateTaskStatusRequest request) {
+// ---------------------------------------------------------------------------------------------------------------------
+
+    public UpdateTaskStatusResponse updateTaskStatus(Long taskId, UpdateTaskStatusRequest request, AuthUserDto authUserDto) {
 
         // 작업 조회 + 404 Not Found: 작업을 찾을 수 없음
         Task task = taskRepository.findById(taskId)
@@ -229,6 +231,16 @@ public class TaskService {
         // 400 Bad Request: 잘못된 상태 값
         if (request.getStatus() == null) {
             throw new CustomException(ErrorMessage.NOT_CORRECT_TASK_STATUS);
+        }
+
+        // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 수정 권한 없음
+        // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
+        boolean isAssignee = authUserDto.getId().equals(task.getAssignee().getId());
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
+
+        // 담당자가 아니고 + 관리자가 아니면 -> 403 Forbidden
+        if (!isAssignee && !isAdmin) {
+            throw new CustomException(ErrorMessage.NOT_MODIFY_AUTHORIZED);
         }
 
         // 상태 변경: _TODO → IN_PROGRESS → DONE 순차적 변경만 허용
