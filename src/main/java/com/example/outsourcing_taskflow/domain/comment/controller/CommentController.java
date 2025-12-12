@@ -1,8 +1,11 @@
 package com.example.outsourcing_taskflow.domain.comment.controller;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
+import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.response.ReadCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.service.CommentService;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -69,13 +73,52 @@ public class CommentController {
     @PostMapping("/tasks/{taskId}/comments")
     public ResponseEntity<ApiResponse<CreateCommentResponse>> createComment(
             @PathVariable Long taskId,
-            @Valid @RequestBody CreateCommentRequest request) {
+            @Valid @RequestBody CreateCommentRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto) {
 
-        CreateCommentResponse response = commentService.createComment(taskId, request, request.getUserId()); // security 적용 전 userId 임시 적용
+        CreateCommentResponse response = commentService.createComment(taskId, request, authUserDto); // security 적용 전 userId 임시 적용
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("댓글이 작성되었습니다.", response));
+    }
+
+    /**
+     * 댓글 수정
+     */
+    @PutMapping("/tasks/{taskId}/comments/{commentId}")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
+            @PathVariable Long taskId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody UpdateCommentRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto) {
+
+        CommentResponseDto responseDto = commentService.updateComment(
+                taskId,
+                commentId,
+                request,
+                authUserDto
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success("댓글이 수정되었습니다.", responseDto)
+        );
+    }
+
+    /**
+     * 댓글 삭제 (Soft Delete)
+     */
+    @DeleteMapping("/tasks/{taskId}/comments/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long taskId,
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal AuthUserDto authUserDto) {
+
+        commentService.deleteComment(taskId, commentId, authUserDto);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("댓글이 삭제되었습니다.", null)
+        );
     }
 
 }

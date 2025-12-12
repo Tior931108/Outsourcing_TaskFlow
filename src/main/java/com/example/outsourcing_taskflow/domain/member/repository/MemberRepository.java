@@ -24,4 +24,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m JOIN FETCH m.user")
     List<Member> findAllWithUser();
+
+    // 추가 가능한 사용자 조회
+    @Query("SELECT u FROM User u WHERE u.id NOT IN " +
+            "(SELECT m.user.id FROM Member m WHERE m.team.id = :teamId)")
+    List<User> findUsersNotInTeam(@Param("teamId") Long teamId);
+
 }

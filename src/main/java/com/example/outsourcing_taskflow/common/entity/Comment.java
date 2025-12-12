@@ -52,4 +52,13 @@ public class Comment extends BaseEntity{
         this(content, user, task, null);
     }
 
+    // 댓글 내용 수정
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    // 댓글 삭제 (Soft Delete)
+    public void delete() {
+        this.isDeleted = IsDeleted.TRUE;
+    }
 }
