@@ -1,7 +1,6 @@
-package com.example.outsourcing_taskflow.common;
+package com.example.outsourcing_taskflow.common.utils;
 
 import com.example.outsourcing_taskflow.common.entity.*;
-import com.example.outsourcing_taskflow.common.enums.ActivityType;
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.domain.activitylog.repository.ActivityLogRepository;
@@ -53,16 +52,18 @@ public class initData implements ApplicationRunner {
         log.info("========================================");
 
         // ===== 1. 사용자 생성 =====
+
         User user1 = new User("johndoe", "john@example.com",
-                passwordEncoder.encode("Password123"), "John Doe");
+                passwordEncoder.encode("Password123!"), "John Doe");
+        user1.updateAdminRole();
         userRepository.save(user1);
 
         User user2 = new User("janedoe", "jane@example.com",
-                passwordEncoder.encode("Password123"), "Jane Doe");
+                passwordEncoder.encode("Password123!"), "Jane Doe");
         userRepository.save(user2);
 
         User user3 = new User("leeyounghe", "younghee@example.com",
-                passwordEncoder.encode("Password123"), "이영희");
+                passwordEncoder.encode("Password123!"), "이영희");
         userRepository.save(user3);
 
         log.info("✅ 사용자 3명 생성 완료");
