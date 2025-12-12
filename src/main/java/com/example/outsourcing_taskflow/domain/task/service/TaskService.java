@@ -5,20 +5,17 @@ import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service

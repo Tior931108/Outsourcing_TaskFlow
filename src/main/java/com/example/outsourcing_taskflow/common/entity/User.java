@@ -42,4 +42,9 @@ public class User extends BaseEntity {
         this.name = name;
         this.role = UserRoleEnum.USER;
     }
+
+    // 관리자 권한 업데이트
+    public void updateAdminRole() {
+        this.role = UserRoleEnum.ADMIN;
+    }
 }
