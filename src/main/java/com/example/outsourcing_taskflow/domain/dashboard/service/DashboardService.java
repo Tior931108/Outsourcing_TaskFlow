@@ -1,15 +1,22 @@
 package com.example.outsourcing_taskflow.domain.dashboard.service;
 
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
+import com.example.outsourcing_taskflow.domain.dashboard.model.dto.TaskSummaryDto;
 import com.example.outsourcing_taskflow.domain.dashboard.model.response.DashboardStatsResponse;
+import com.example.outsourcing_taskflow.domain.dashboard.model.response.MyTasksResponse;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -78,5 +85,55 @@ public class DashboardService {
                 teamProgress,
                 completionRate
         );
+    }
+
+    /**
+     * 내 작업 요약 조회
+     */
+    public MyTasksResponse getMyTasks(AuthUserDto authUserDto) {
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();  // 오늘 00:00:00
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);  // 오늘 23:59:59
+        LocalDateTime tomorrow = today.plusDays(1).atStartOfDay();  // 내일 00:00:00
+        LocalDateTime weekLater = today.plusDays(8).atStartOfDay();  // 7일 후 00:00:00
+
+        // 1. 오늘 마감인 작업
+        List<Task> todayTasks = taskRepository.findTodayTasksByUserId(
+                authUserDto.getId(),
+                startOfDay,
+                endOfDay,
+                IsDeleted.FALSE
+        );
+
+        // 2. 다가오는 작업 (내일 ~ 7일 이내)
+        List<Task> upcomingTasks = taskRepository.findUpcomingTasksByUserId(
+                authUserDto.getId(),
+                tomorrow,
+                weekLater,
+                IsDeleted.FALSE
+        );
+
+        // 3. 기한 초과 작업
+        List<Task> overdueTasks = taskRepository.findOverdueTasksByUserId(
+                authUserDto.getId(),
+                startOfDay,
+                IsDeleted.FALSE
+        );
+
+        // Entity -> DTO 변환
+        List<TaskSummaryDto> todayTaskDtos = todayTasks.stream()
+                .map(TaskSummaryDto::new)
+                .collect(Collectors.toList());
+
+        List<TaskSummaryDto> upcomingTaskDtos = upcomingTasks.stream()
+                .map(TaskSummaryDto::new)
+                .collect(Collectors.toList());
+
+        List<TaskSummaryDto> overdueTaskDtos = overdueTasks.stream()
+                .map(TaskSummaryDto::new)
+                .collect(Collectors.toList());
+
+        return new MyTasksResponse(todayTaskDtos, upcomingTaskDtos, overdueTaskDtos);
     }
 }
