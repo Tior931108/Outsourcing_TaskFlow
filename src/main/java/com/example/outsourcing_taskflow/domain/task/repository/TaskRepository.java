@@ -119,4 +119,31 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("isDeleted") IsDeleted isDeleted
     );
+
+    /**
+     * 주간 작업 통계 메소드
+     */
+
+    // 특정 날짜에 생성된 작업 수 (createdAt 기준)
+    @Query("SELECT COUNT(t) FROM Task t " +
+            "WHERE t.createdAt >= :startOfDay " +
+            "AND t.createdAt < :endOfDay " +
+            "AND t.isDeleted = :isDeleted")
+    long countTasksCreatedOnDate(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            @Param("isDeleted") IsDeleted isDeleted
+    );
+
+    // 특정 날짜에 완료된 작업 수 (updatedAt 기준, DONE 상태)
+    @Query("SELECT COUNT(t) FROM Task t " +
+            "WHERE t.updatedAt >= :startOfDay " +
+            "AND t.updatedAt < :endOfDay " +
+            "AND t.status = com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.DONE " +
+            "AND t.isDeleted = :isDeleted")
+    long countTasksCompletedOnDate(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            @Param("isDeleted") IsDeleted isDeleted
+    );
 }

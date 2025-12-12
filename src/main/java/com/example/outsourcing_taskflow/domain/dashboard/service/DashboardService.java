@@ -4,6 +4,7 @@ import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
+import com.example.outsourcing_taskflow.domain.dashboard.model.dto.DailyTrendDto;
 import com.example.outsourcing_taskflow.domain.dashboard.model.dto.TaskSummaryDto;
 import com.example.outsourcing_taskflow.domain.dashboard.model.response.DashboardStatsResponse;
 import com.example.outsourcing_taskflow.domain.dashboard.model.response.MyTasksResponse;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,9 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private final TaskRepository taskRepository;
+
+    // 요일 배열 (월, 화, 수, 목, 금, 토, 일)
+    private static final String[] DAY_NAMES = {"월", "화", "수", "목", "금", "토", "일"};
 
     /**
      * 대시보드 통계 조회
@@ -135,5 +141,54 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         return new MyTasksResponse(todayTaskDtos, upcomingTaskDtos, overdueTaskDtos);
+    }
+
+    /**
+     * 주간 작업 추세 조회 (최근 7일)
+     */
+    public List<DailyTrendDto> getWeeklyTrend() {
+
+        List<DailyTrendDto> weeklyTrend = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // 최근 7일간의 데이터 생성 (6일 전 ~ 오늘)
+        for (int i = 6; i >= 0; i--) {
+            LocalDate targetDate = today.minusDays(i);
+            LocalDateTime startOfDay = targetDate.atStartOfDay();  // 00:00:00
+            LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);  // 23:59:59.999
+
+            // 해당 날짜에 생성된 작업 수
+            long tasksCreated = taskRepository.countTasksCreatedOnDate(
+                    startOfDay,
+                    endOfDay,
+                    IsDeleted.FALSE
+            );
+
+            // 해당 날짜에 완료된 작업 수
+            long tasksCompleted = taskRepository.countTasksCompletedOnDate(
+                    startOfDay,
+                    endOfDay,
+                    IsDeleted.FALSE
+            );
+
+            // 요일 이름 가져오기 (1=월요일, 7=일요일)
+            int dayOfWeek = targetDate.getDayOfWeek().getValue();
+            String dayName = DAY_NAMES[dayOfWeek - 1];
+
+            // 날짜 형식 (YYYY-MM-DD)
+            String dateString = targetDate.format(dateFormatter);
+
+            DailyTrendDto dailyTrend = new DailyTrendDto(
+                    dayName,
+                    (int) tasksCreated,
+                    (int) tasksCompleted,
+                    dateString
+            );
+
+            weeklyTrend.add(dailyTrend);
+        }
+
+        return weeklyTrend;
     }
 }
