@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.user.service;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
@@ -8,10 +9,12 @@ import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -129,24 +132,62 @@ public class UserService {
      */
     public UpdateUserResponse updateUser(Long id, UpdateUserRequest request, Long authUserID) {
 
-        // 다른 사용자 정보 수정 시도
-        if (!id.equals(authUserID)) {
-            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
-        }
-
-        User user = userRepository.findById(id).orElseThrow(
+        User user = userRepository.findById(authUserID).orElseThrow(
                 () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
         );
+
+        // 다른 사용자 정보 수정 시도
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
+        }
 
         // 중복된 이메일
         if (user.getEmail().equals(request.getEmail())) {
             throw new CustomException(ErrorMessage.EXIST_EMAIL);
         }
 
-        user.update(request.getName(), request.getEmail(), request.getPassword());
+        user.update(request.getName(), request.getEmail(), passwordEncoder.encode(request.getPassword()));
 
         UserDto userDto = UserDto.from(user);
 
         return UpdateUserResponse.from(userDto);
+    }
+
+
+    /**
+     * 회원 탈퇴
+     */
+    public void deleteUser(Long id, Long authUserId) {
+
+        // 다른 사용자 탈퇴 시도
+        if (!id.equals(authUserId)) {
+            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
+        }
+
+        userRepository.deleteById(authUserId);
+    }
+
+
+    /**
+     * 비밀번호 확인
+     */
+    public VerifyPasswordResponse verifyPassword(VerifyPasswordRequest request, Long authUserId) {
+
+        User user = userRepository.findById(authUserId).orElseThrow(
+                () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+
+        VerifyPasswordResponse verifyPasswordResponse = new VerifyPasswordResponse();
+
+        // 잘못된 비밀번호
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            verifyPasswordResponse.setValid(false);
+        } else {
+            verifyPasswordResponse.setValid(true);
+        }
+
+
+        return verifyPasswordResponse;
     }
 }
