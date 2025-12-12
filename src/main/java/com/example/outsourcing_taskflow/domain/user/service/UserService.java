@@ -7,9 +7,11 @@ import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -95,6 +97,10 @@ public class UserService {
         return GetUserResponse.from(userDto);
     }
 
+
+    /**
+     * 사용자 목록 조회
+     */
     @Transactional(readOnly = true)
     public List<GetAllResponse> getAll() {
 
@@ -115,5 +121,32 @@ public class UserService {
         }
 
         return responseList;
+    }
+
+
+    /**
+     * 사용자 정보 수정
+     */
+    public UpdateUserResponse updateUser(Long id, UpdateUserRequest request, Long authUserID) {
+
+        // 다른 사용자 정보 수정 시도
+        if (!id.equals(authUserID)) {
+            throw new CustomException(ErrorMessage.ONLY_OWNER_ACCESS);
+        }
+
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+        // 중복된 이메일
+        if (user.getEmail().equals(request.getEmail())) {
+            throw new CustomException(ErrorMessage.EXIST_EMAIL);
+        }
+
+        user.update(request.getName(), request.getEmail(), request.getPassword());
+
+        UserDto userDto = UserDto.from(user);
+
+        return UpdateUserResponse.from(userDto);
     }
 }

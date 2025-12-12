@@ -3,9 +3,11 @@ package com.example.outsourcing_taskflow.domain.user.controller;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
+import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
 import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +73,27 @@ public class UserController {
         ApiResponse<List<GetAllResponse>> apiResponse = new ApiResponse<>(true, "사용자 목록 조회 성공", responseList);
 
         ResponseEntity<ApiResponse<List<GetAllResponse>>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        return response;
+    }
+
+
+    /**
+     * 사용자 정보 수정
+     */
+    @PutMapping("/api/users/{id}")
+    public ResponseEntity<ApiResponse<UpdateUserResponse>> updateUser(
+            @PathVariable Long id,
+            @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+        Long authUserID = authUserDto.getId();
+
+        UpdateUserResponse updateUser = userService.updateUser(id, request, authUserID);
+
+        ApiResponse<UpdateUserResponse> apiResponse = new ApiResponse<>(true, "사용자 정보가 수정되었습니다.", updateUser);
+
+        ResponseEntity<ApiResponse<UpdateUserResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
         return response;
     }
