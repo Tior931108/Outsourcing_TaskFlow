@@ -1,26 +1,29 @@
-package com.example.outsourcing_taskflow.domain.team.dto.response;
+package com.example.outsourcing_taskflow.domain.member.dto.response;
 
 import com.example.outsourcing_taskflow.common.entity.User;
+import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class TeamMemberResponse {
+public class MemberDetailReasponseDto {
 
+    // 속성
     private Long id;
     private String username;
     private String name;
     private String email;
-    private String role;
+    private UserRoleEnum role;
     private LocalDateTime createdAt;
 
-    public TeamMemberResponse(User user) {
+    // 생성자
+    public MemberDetailReasponseDto(User user) {
         this.id = user.getId();
         this.username = user.getUserName();
         this.name = user.getName();
-        this.role = user.getRole().toString();
         this.email = user.getEmail();
+        this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
     }
 }
