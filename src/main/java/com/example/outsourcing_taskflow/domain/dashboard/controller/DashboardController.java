@@ -2,6 +2,7 @@ package com.example.outsourcing_taskflow.domain.dashboard.controller;
 
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
+import com.example.outsourcing_taskflow.domain.dashboard.model.dto.DailyTrendDto;
 import com.example.outsourcing_taskflow.domain.dashboard.model.response.DashboardStatsResponse;
 import com.example.outsourcing_taskflow.domain.dashboard.model.response.MyTasksResponse;
 import com.example.outsourcing_taskflow.domain.dashboard.service.DashboardService;
@@ -11,6 +12,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -44,6 +47,19 @@ public class DashboardController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("내 작업 요약 조회 성공", myTasks)
+        );
+    }
+
+    /**
+     * 주간 작업 추세 조회
+     */
+    @GetMapping("/weekly-trend")
+    public ResponseEntity<ApiResponse<List<DailyTrendDto>>> getWeeklyTrend() {
+
+        List<DailyTrendDto> weeklyTrend = dashboardService.getWeeklyTrend();
+
+        return ResponseEntity.ok(
+                ApiResponse.success("주간 작업 추세 조회 성공", weeklyTrend)
         );
     }
 }
