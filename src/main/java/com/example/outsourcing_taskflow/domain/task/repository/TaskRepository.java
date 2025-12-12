@@ -33,6 +33,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> searchByKeyword(@Param("keyword") String keyword);
 
 
+    /**
+     * 대시보드 통계용 메소드
+     */
 
     // 전체 작업 수 (삭제되지 않은 것만)
     long countByIsDeleted(IsDeleted isDeleted);
@@ -53,4 +56,55 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // 특정 사용자의 완료된 작업 수
     long countByAssigneeIdAndStatusAndIsDeleted(Long userId, TaskStatusEnum status, IsDeleted isDeleted);
+
+
+    /**
+     * 작업 요약용 메소드
+     */
+
+    //오늘 마감인 내 작업 조회 (오늘 00:00 ~ 23:59:59)
+    @Query("SELECT t FROM Task t " +
+            "WHERE t.assignee.id = :userId " +
+            "AND t.dueDate >= :startOfDay " +
+            "AND t.dueDate < :endOfDay " +
+            "AND t.status IN (com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.TODO, " +
+            "                 com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.IN_PROGRESS) " +
+            "AND t.isDeleted = :isDeleted " +
+            "ORDER BY t.priority DESC, t.dueDate ASC")
+    List<Task> findTodayTasksByUserId(
+            @Param("userId") Long userId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            @Param("isDeleted") IsDeleted isDeleted
+    );
+
+    //다가오는 내 작업 조회 (오늘 이후 ~ 7일 이내)
+    @Query("SELECT t FROM Task t " +
+            "WHERE t.assignee.id = :userId " +
+            "AND t.dueDate >= :tomorrow " +
+            "AND t.dueDate < :weekLater " +
+            "AND t.status IN (com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.TODO, " +
+            "                 com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.IN_PROGRESS) " +
+            "AND t.isDeleted = :isDeleted " +
+            "ORDER BY t.dueDate ASC, t.priority DESC")
+    List<Task> findUpcomingTasksByUserId(
+            @Param("userId") Long userId,
+            @Param("tomorrow") LocalDateTime tomorrow,
+            @Param("weekLater") LocalDateTime weekLater,
+            @Param("isDeleted") IsDeleted isDeleted
+    );
+
+    //기한 초과된 내 작업 조회 (오늘 이전)
+    @Query("SELECT t FROM Task t " +
+            "WHERE t.assignee.id = :userId " +
+            "AND t.dueDate < :startOfDay " +
+            "AND t.status IN (com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.TODO, " +
+            "                 com.example.outsourcing_taskflow.common.enums.TaskStatusEnum.IN_PROGRESS) " +
+            "AND t.isDeleted = :isDeleted " +
+            "ORDER BY t.dueDate ASC")
+    List<Task> findOverdueTasksByUserId(
+            @Param("userId") Long userId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("isDeleted") IsDeleted isDeleted
+    );
 }
