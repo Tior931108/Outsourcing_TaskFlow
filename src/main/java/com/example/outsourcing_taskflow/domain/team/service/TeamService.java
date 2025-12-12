@@ -4,6 +4,8 @@ import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
+import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
+import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponseDto;
 import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponseDto;
@@ -112,8 +114,17 @@ public class TeamService {
     public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request, AuthUserDto authUserDto) {
 
         // 권한 검증
-        if (!"ADMIN".equals(authUserDto.getRole())) {
-            throw new CustomException(NOT_MODIFY_AUTHORIZED);
+//        if (!UserRoleEnum.ADMIN.equals(authUserDto.getRole())) {
+//            throw new CustomException(NOT_MODIFY_AUTHORIZED);
+//        }
+
+        // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 수정 권한 없음
+        // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
+
+        // 권한 검증
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
+        if (!isAdmin) {
+            throw new CustomException(ErrorMessage.NOT_MODIFY_AUTHORIZED);
         }
 
         Team team = teamRepository.findById(teamId)
@@ -209,8 +220,13 @@ public class TeamService {
     public void deleteTeamMember(Long teamId, Long userId, AuthUserDto authUserDto) {
 
         // 권한 검증
-        if (!"ADMIN".equals(authUserDto.getRole())) {
-            throw new CustomException(NOT_REMOVE_AUTHORIZED);
+//        if (!UserRoleEnum.ADMIN.equals(authUserDto.getRole())) {
+//            throw new CustomException(NOT_REMOVE_AUTHORIZED);
+//        }
+        // 권한 검증
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
+        if (!isAdmin) {
+            throw new CustomException(ErrorMessage.NOT_REMOVE_AUTHORIZED);
         }
 
         Team team = teamRepository.findById(teamId)
