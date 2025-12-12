@@ -1,21 +1,20 @@
 package com.example.outsourcing_taskflow.domain.user.service;
 
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
+import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
+import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.LoginUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
-import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.*;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +30,8 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -216,5 +217,39 @@ public class UserService {
         }
 
         return verifyPasswordResponse;
+    }
+
+
+    /**
+     * 추가 가능한 사용자 조회
+     */
+    public List<AvailableUserResponse> availableUser(Long teamId) {
+
+        // teamId가 존재할 때, 해당 팀에 속한 멤버를 제외한 사용자를 불러와라
+        // 팀에 없는 사용자 리스트 반환
+        List<User> userList = memberRepository.findUsersNotInTeam(teamId);
+        List<AvailableUserResponse> responseList = new ArrayList<>();
+
+        for (User user: userList) {
+
+            // 탈퇴한 사용자 제외
+            if (user.getIsDeleted().equals(IsDeleted.FALSE)) {
+
+                UserDto userDto = UserDto.from(user);
+
+                AvailableUserResponse response = new AvailableUserResponse(
+                        userDto.getId(),
+                        userDto.getUserName(),
+                        userDto.getEmail(),
+                        userDto.getName(),
+                        userDto.getRole(),
+                        userDto.getCreatedAt()
+                );
+
+                responseList.add(response);
+            }
+        }
+
+        return responseList;
     }
 }

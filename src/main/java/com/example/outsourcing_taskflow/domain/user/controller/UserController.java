@@ -5,11 +5,7 @@ import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.domain.user.model.request.CreateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.UpdateUserRequest;
 import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
-import com.example.outsourcing_taskflow.domain.user.model.response.CreateUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.GetAllResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.GetUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.UpdateUserResponse;
-import com.example.outsourcing_taskflow.domain.user.model.response.VerifyPasswordResponse;
+import com.example.outsourcing_taskflow.domain.user.model.response.*;
 import com.example.outsourcing_taskflow.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -144,6 +140,29 @@ public class UserController {
             return response;
         }
 
+    }
+
+
+    /**
+     * 추가 가능한 사용자 조회
+     */
+    @GetMapping("/api/users/available")
+    public ResponseEntity<ApiResponse<Object>> availableUser(
+            @RequestParam(required = false) Long teamId,
+            @AuthenticationPrincipal AuthUserDto authUserDto
+    ) {
+
+        if (teamId != null) {
+            List<AvailableUserResponse> responseList = userService.availableUser(teamId);
+
+            ApiResponse<Object> apiResponse = new ApiResponse<>(true, "추가 가능한 사용자 목록 조회 성공", responseList);
+
+            ResponseEntity<ApiResponse<Object>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+            return response;
+        }
+
+        return null;
     }
 }
 
