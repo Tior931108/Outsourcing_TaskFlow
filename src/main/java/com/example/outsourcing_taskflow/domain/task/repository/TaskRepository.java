@@ -1,6 +1,7 @@
 package com.example.outsourcing_taskflow.domain.task.repository;
 
 import com.example.outsourcing_taskflow.common.entity.Task;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // 상태+담당자로 작업을 검색
     Page<Task> findByStatusAndAssigneeId(TaskStatusEnum status, Long assigneeId, Pageable pageable);
+
+    // 상태 + 삭제 여부
+    Page<Task> findByStatusAndIsDeleted(TaskStatusEnum status, IsDeleted isDeleted, Pageable pageable);
+
+    // 담당자 + 삭제 여부
+    Page<Task> findByAssigneeIdAndIsDeleted(Long assigneeId, IsDeleted isDeleted, Pageable pageable);
+
+    // 상태 + 담당자 + 삭제 여부
+    Page<Task> findByStatusAndAssigneeIdAndIsDeleted(TaskStatusEnum status, Long assigneeId, IsDeleted isDeleted, Pageable pageable);
+
+    // 전체 조회 + 삭제 여부
+    Page<Task> findByIsDeleted(IsDeleted isDeleted, Pageable pageable);
 
 
     // - Search By Keyword
