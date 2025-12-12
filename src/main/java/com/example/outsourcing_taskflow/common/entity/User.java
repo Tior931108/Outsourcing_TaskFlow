@@ -58,4 +58,9 @@ public class User extends BaseEntity {
     public void softDelete(IsDeleted isDeleted) {
         this.isDeleted = isDeleted;
     }
+
+    // 관리자 권한 업데이트
+    public void updateAdminRole() {
+        this.role = UserRoleEnum.ADMIN;
+    }
 }
