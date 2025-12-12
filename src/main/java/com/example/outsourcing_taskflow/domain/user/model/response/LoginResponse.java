@@ -2,12 +2,12 @@ package com.example.outsourcing_taskflow.domain.user.model.response;
 
 import lombok.Getter;
 
+import lombok.RequiredArgsConstructor;
+
 @Getter
+@RequiredArgsConstructor
 public class LoginResponse {
 
-    private String token;
+    private final String token;
 
-    public LoginResponse(String token) {
-        this.token = token;
-    }
 }

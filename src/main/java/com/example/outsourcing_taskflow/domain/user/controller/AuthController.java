@@ -24,12 +24,13 @@ public class AuthController {
     ) {
         String token = userService.login(request);
 
-        // LoginResponse로 감싸기 ✅
         LoginResponse loginResponse = new LoginResponse(token);
 
-        // ApiResponse로 한 번 더 감싸기 ✅
-        return ResponseEntity.ok(
-                ApiResponse.success("로그인 성공", loginResponse)
-        );
+        ApiResponse<LoginResponse> apiResponse = new ApiResponse<>(true, "로그인 성공", loginResponse);
+
+        ResponseEntity<ApiResponse<LoginResponse>> response = new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        return response;
+
     }
 }

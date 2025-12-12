@@ -18,7 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")  // /api 하위 모든경로에 적용
                 .allowedOrigins(allowedOrigins) // 프론트엔드 주소
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")  // 또는 "Authorization", "Content-Type"
                 // .allowCredentials(true)  // 쿠키/세션의 경우 필수, JWT는 헤더로 보내니까 선택사항!
                 .maxAge(3600);

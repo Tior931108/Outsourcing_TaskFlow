@@ -22,7 +22,7 @@ import java.util.Date;
 public class JwtUtil {
 
     // 기본 세팅
-    public static final String BEARER_PREFIX = "Bearer ";
+//    public static final String BEARER_PREFIX = "Bearer ";
     private static final Long TOKEN_TIME = 60 * 60 * 1000L; // 60분
 
     private SecretKey key;
@@ -49,7 +49,8 @@ public class JwtUtil {
      */
     public String generateToken(Long userId, String username, UserRoleEnum role) {
         Date now = new Date();
-        return Jwts.builder()
+
+        return  Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("role", role)

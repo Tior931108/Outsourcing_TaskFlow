@@ -33,7 +33,11 @@ public class User extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private UserRoleEnum role = UserRoleEnum.USER; // 유저 권한
-    
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    @Builder.Default
+    private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
 
     public User(String userName, String email, String password, String name) {
         this.userName = userName;
@@ -41,5 +45,17 @@ public class User extends BaseEntity {
         this.password = password;
         this.name = name;
         this.role = UserRoleEnum.USER;
+        this.isDeleted = IsDeleted.FALSE;
+    }
+
+    public void update(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    // 소프트 딜리트
+    public void softDelete(IsDeleted isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }
