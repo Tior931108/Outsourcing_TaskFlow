@@ -6,10 +6,8 @@ import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-//@Where(clause = "is_deleted = 'FALSE'")
 @Entity
 @Getter
 @Table(name = "tasks")
@@ -86,12 +84,12 @@ public class Task extends BaseEntity {
         }
     }
 
-//    public void softDelete() {
-//        this.isDeleted = IsDeleted.TRUE;
-//    }
-
     public void  softDelete() {
         this.isDeleted = IsDeleted.TRUE;
+    }
+
+    public void updateStatus(TaskStatusEnum newStatus) {
+        this.status = newStatus;
     }
 
 }

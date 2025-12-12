@@ -5,9 +5,11 @@ import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskStatusResponse;
 import com.example.outsourcing_taskflow.domain.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,11 +60,18 @@ public class TaskController {
         return ApiResponse.success("작업이 수정되었습니다.", response);
     }
 
-    // 작업 삭제 - 수정 필요?
+    // 작업 삭제
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteTask(@PathVariable Long id, @AuthenticationPrincipal AuthUserDto authUserDto) {
         taskService.deleteTask(authUserDto, id);
         return ApiResponse.success("작업이 삭제되었습니다.");
+    }
+
+    // 작업 상태 변경 : _TODO → IN_PROGRESS → DONE 순차적 변경만 허용
+    @PatchMapping("/{id}/status")
+    public ApiResponse<UpdateTaskStatusResponse> updateTaskStatus(@PathVariable Long id, @RequestBody UpdateTaskStatusRequest request) {
+        UpdateTaskStatusResponse response = taskService.updateTaskStatus(id, request);
+        return ApiResponse.success("작업 상태가 변경되었습니다.", response);
     }
 
 }
