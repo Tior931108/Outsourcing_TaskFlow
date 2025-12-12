@@ -58,4 +58,11 @@ public class TaskController {
         return ApiResponse.success("작업이 수정되었습니다.", response);
     }
 
+    // 작업 삭제 - 수정 필요?
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteTask(@PathVariable Long id, @AuthenticationPrincipal AuthUserDto authUserDto) {
+        taskService.deleteTask(authUserDto, id);
+        return ApiResponse.success("작업이 삭제되었습니다.");
+    }
+
 }

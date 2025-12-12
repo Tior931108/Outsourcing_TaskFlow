@@ -19,6 +19,7 @@ public class CreateTaskRequest {
     private TaskPriorityEnum priority;
     @NotNull(message = "담당자 ID는 필수입니다.")
     private Long assigneeId;
+    @NotNull(message = "마감일은 필수입니다.")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime dueDate;
 

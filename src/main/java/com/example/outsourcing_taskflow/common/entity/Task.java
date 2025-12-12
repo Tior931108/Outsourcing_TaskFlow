@@ -6,9 +6,10 @@ import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-
+//@Where(clause = "is_deleted = 'FALSE'")
 @Entity
 @Getter
 @Table(name = "tasks")
@@ -47,6 +48,9 @@ public class Task extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
 
+//    @Column(nullable = false)
+//    private boolean isDeleted = false;
+
     // 생성자
     public Task(String title, String description, TaskStatusEnum status, TaskPriorityEnum priority, User assignee, LocalDateTime dueDate) {
         this.title = title;
@@ -80,6 +84,14 @@ public class Task extends BaseEntity {
         if (request.getDueDate() != null) {
             this.dueDate = request.getDueDate();
         }
+    }
+
+//    public void softDelete() {
+//        this.isDeleted = IsDeleted.TRUE;
+//    }
+
+    public void  softDelete() {
+        this.isDeleted = IsDeleted.TRUE;
     }
 
 }

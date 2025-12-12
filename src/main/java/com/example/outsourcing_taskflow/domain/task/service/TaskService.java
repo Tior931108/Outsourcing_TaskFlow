@@ -4,6 +4,7 @@ import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
@@ -64,6 +65,12 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
 
+        // 논리 삭제된 작업은 제외
+//        if (task.isDeleted()) {
+        if (task.getIsDeleted() == IsDeleted.TRUE) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
         return GetTaskResponse.from(task);
     }
 
@@ -91,21 +98,35 @@ public class TaskService {
             }
         }
 
-        // DB 쿼리 선택
+//        // DB 쿼리 선택
+//        if (statusEnum != null && assigneeId != null) {
+//            // 상태 + 담당자
+//            tasks = taskRepository.findByStatusAndAssigneeId(statusEnum, assigneeId, pageable);
+//        } else if (statusEnum != null) {
+//            // 상태만
+//            tasks = taskRepository.findByStatus(statusEnum, pageable);
+//        } else if (assigneeId != null) {
+//            // 담당자만
+//            tasks = taskRepository.findByAssigneeId(assigneeId, pageable);
+//        } else { // 아무 조건 없이 전체 조회
+//            tasks = taskRepository.findAll(pageable);
+//        }
+
+        // 작업상태와 담당자의 값 여부에 따른 조회 + 삭제되지 않은 작업만
         if (statusEnum != null && assigneeId != null) {
-            // 상태 + 담당자
-            tasks = taskRepository.findByStatusAndAssigneeId(statusEnum, assigneeId, pageable);
+            tasks = taskRepository.findByStatusAndAssigneeIdAndIsDeleted(
+                    statusEnum, assigneeId, IsDeleted.FALSE, pageable);
         } else if (statusEnum != null) {
-            // 상태만
-            tasks = taskRepository.findByStatus(statusEnum, pageable);
+            tasks = taskRepository.findByStatusAndIsDeleted(
+                    statusEnum, IsDeleted.FALSE, pageable);
         } else if (assigneeId != null) {
-            // 담당자만
-            tasks = taskRepository.findByAssigneeId(assigneeId, pageable);
-        } else { // 아무 조건 없이 전체 조회
-            tasks = taskRepository.findAll(pageable);
+            tasks = taskRepository.findByAssigneeIdAndIsDeleted(
+                    assigneeId, IsDeleted.FALSE, pageable);
+        } else {
+            tasks = taskRepository.findByIsDeleted(IsDeleted.FALSE, pageable);
         }
 
-        // search
+        // search - keyword
         if (search != null && !search.isEmpty()) {
             String keyword = search.toLowerCase();
 
@@ -134,10 +155,16 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
 
+        // 논리 삭제된 작업은 제외
+//        if (task.isDeleted()) {
+        if (task.getIsDeleted() == IsDeleted.TRUE) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
         // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 수정 권한 없음
         // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
         boolean isAssignee = authUserDto.getId().equals(task.getAssignee().getId());
-        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.name());
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
 
         // 담당자가 아니고 + 관리자가 아니면 -> 403 Forbidden
         if (!isAssignee && !isAdmin) {
@@ -155,6 +182,31 @@ public class TaskService {
         task.update(request, newAssignee);
         // 변경 감지(Dirty Checking)에 의해 자동 업데이트
         return UpdateTaskResponse.from(task);
+    }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+    public void deleteTask(AuthUserDto authUserDto, Long taskId) {
+
+        // 작업 조회 + 404 Not Found: 작업을 찾을 수 없음
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
+
+        // 논리 삭제된 작업은 제외
+//        if (task.isDeleted()) {
+        if (task.getIsDeleted() == IsDeleted.TRUE) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
+        // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 삭제 권한 없음
+        boolean isAssignee = authUserDto.getId().equals(task.getAssignee().getId());
+        boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
+        if (!isAssignee && !isAdmin) {
+            throw new CustomException(ErrorMessage.NOT_TASK_DELETE_AUTHORIZED);
+        }
+
+        task.softDelete();
+
     }
 
 // ---------------------------------------------------------------------------------------------------------------------
