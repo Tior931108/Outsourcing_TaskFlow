@@ -1,14 +1,20 @@
 package com.example.outsourcing_taskflow.domain.task.controller;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
 import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskStatusResponse;
 import com.example.outsourcing_taskflow.domain.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,10 +45,33 @@ public class TaskController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Long assigneeId
-    ) {
+            @RequestParam(required = false) Long assigneeId) {
         Page<GetTaskResponse> result = taskService.getAllTasks(page, size, status, search, assigneeId);
         return PageResponse.success("작업 목록 조회 성공", result);
+    }
+    
+    // 작업 수정
+    @PutMapping("/{id}")
+    public ApiResponse<UpdateTaskResponse> updateTask(
+            @Valid @PathVariable Long id,
+            @Valid @RequestBody UpdateTaskRequest request,
+            @AuthenticationPrincipal AuthUserDto authUserDto) {
+        UpdateTaskResponse response = taskService.updateTask(id, request, authUserDto);
+        return ApiResponse.success("작업이 수정되었습니다.", response);
+    }
+
+    // 작업 삭제
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteTask(@PathVariable Long id, @AuthenticationPrincipal AuthUserDto authUserDto) {
+        taskService.deleteTask(authUserDto, id);
+        return ApiResponse.success("작업이 삭제되었습니다.");
+    }
+
+    // 작업 상태 변경 : _TODO → IN_PROGRESS → DONE 순차적 변경만 허용
+    @PatchMapping("/{id}/status")
+    public ApiResponse<UpdateTaskStatusResponse> updateTaskStatus(@PathVariable Long id, @RequestBody UpdateTaskStatusRequest request) {
+        UpdateTaskStatusResponse response = taskService.updateTaskStatus(id, request);
+        return ApiResponse.success("작업 상태가 변경되었습니다.", response);
     }
 
 }

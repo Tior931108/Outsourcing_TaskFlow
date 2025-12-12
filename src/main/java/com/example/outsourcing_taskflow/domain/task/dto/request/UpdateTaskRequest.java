@@ -1,6 +1,7 @@
 package com.example.outsourcing_taskflow.domain.task.dto.request;
 
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
+import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,12 +10,14 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class CreateTaskRequest {
+public class UpdateTaskRequest {
 
     @NotBlank(message = "제목은 필수 입력 값입니다.")
     private String title;
     @NotBlank(message = "작업 내용은 필수 입력 값입니다.")
     private String description;
+    @NotNull(message = "작업상태는 필수입니다.")
+    private TaskStatusEnum status;
     @NotNull(message = "우선순위는 필수입니다.")
     private TaskPriorityEnum priority;
     @NotNull(message = "담당자 ID는 필수입니다.")
