@@ -64,6 +64,7 @@ public class TaskService {
     public GetTaskResponse getTask(Long taskId) {
 
         // 작업 가져오기 + 404 Not Found: 작업을 찾을 수 없음
+        // 레포지토리에서 delete처리된거 아예 처음부터 안가져오도록
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
 

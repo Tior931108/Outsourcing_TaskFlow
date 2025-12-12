@@ -20,7 +20,8 @@ public class CreateTaskRequest {
     @NotNull(message = "담당자 ID는 필수입니다.")
     private Long assigneeId;
     @NotNull(message = "마감일은 필수입니다.")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
+    // 프론트에서 애초에 값을 이렇게 보내지 않았다...
+//    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime dueDate;
 
 }
