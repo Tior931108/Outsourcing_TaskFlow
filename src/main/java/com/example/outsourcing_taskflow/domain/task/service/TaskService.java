@@ -134,7 +134,7 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_TASK));
 
-        // [현재 접속중인 사용자] = [작업 담당자] || [관리자] 가 !아닐 경우 -> 403 Forbidden: 수정 권한 없음
+        // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 수정 권한 없음
         // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
         boolean isAssignee = authUserDto.getId().equals(task.getAssignee().getId());
         boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.name());
