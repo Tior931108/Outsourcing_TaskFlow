@@ -93,6 +93,27 @@ public class CommentService {
         return CommentResponseDto.from(comment);
     }
 
+    @Transactional
+    public void deleteComment(Long taskId, Long commentId, AuthUserDto authUserDto) {
+
+        // 1. Task 존재 여부 확인
+        if (!taskRepository.existsById(taskId)) {
+            throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
+        }
+
+        // 2. 댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_COMMENT));
+
+        // 3. 권한 확인: 댓글 작성자만 삭제 가능
+        if (!comment.getUser().getId().equals(authUserDto.getId())) {
+            throw new CustomException(ErrorMessage.NOT_COMMENT_DELETE_AUTHORIZED);
+        }
+
+        // 4. Soft Delete
+        comment.delete();
+    }
+
     /**
      * 부모 댓글 검증 및 조회
      */
@@ -123,4 +144,5 @@ public class CommentService {
         }
         return new Comment(content, user, task);
     }
+
 }

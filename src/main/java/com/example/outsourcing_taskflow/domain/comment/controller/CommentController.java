@@ -105,4 +105,20 @@ public class CommentController {
         );
     }
 
+    /**
+     * 댓글 삭제 (Soft Delete)
+     */
+    @DeleteMapping("/tasks/{taskId}/comments/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long taskId,
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal AuthUserDto authUserDto) {
+
+        commentService.deleteComment(taskId, commentId, authUserDto);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("댓글이 삭제되었습니다.", null)
+        );
+    }
+
 }
