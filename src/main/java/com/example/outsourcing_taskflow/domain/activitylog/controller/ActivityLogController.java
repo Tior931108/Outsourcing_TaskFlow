@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.activitylog.controller;
 
+import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,13 +49,13 @@ public class ActivityLogController {
     // - Get My
     @GetMapping("/me")
     public ResponseEntity<PageResponse<GetMyActivityLogResponse>> getMyActivityLogs(
-            //@Authuser
-            @RequestParam(name = "userId") Long userId,
+            @AuthenticationPrincipal AuthUserDto authUserDto,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
-        // - Get Result
+        // - Get Result By AuthUserId
+        Long authUserId = authUserDto.getId();
         Page<GetMyActivityLogResponse> pageResult = activityLogService.getMyActivityLogs(
-                userId, page, size);
+                authUserId, page, size);
         // - Create ResponseDto
         PageResponse<GetMyActivityLogResponse> body = PageResponse.success("내 활동 로그 조회 성공", pageResult);
         // - Return ResponseEntity<PageResponse<T>>
