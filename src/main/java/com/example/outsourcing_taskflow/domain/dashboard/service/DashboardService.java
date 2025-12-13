@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.dashboard.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@MeasureAllMethods
 public class DashboardService {
 
     private final TaskRepository taskRepository;

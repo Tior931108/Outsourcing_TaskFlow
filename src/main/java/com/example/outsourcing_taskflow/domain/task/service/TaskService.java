@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.task.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@MeasureAllMethods
 public class TaskService {
 
     private final TaskRepository taskRepository;
