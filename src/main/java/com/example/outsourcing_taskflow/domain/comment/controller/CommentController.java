@@ -3,11 +3,11 @@ package com.example.outsourcing_taskflow.domain.comment.controller;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
-import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
+import com.example.outsourcing_taskflow.domain.comment.model.response.UpdateCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
-import com.example.outsourcing_taskflow.domain.comment.model.response.ReadCommentResponse;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
 import com.example.outsourcing_taskflow.domain.comment.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,25 +36,25 @@ public class CommentController {
      * @return 댓글 조회 페이징 반환
      */
     @GetMapping("/tasks/{taskId}/comments")
-    public ResponseEntity<PageResponse<ReadCommentResponse>> getComments(
+    public ResponseEntity<PageResponse<CommentResponseDto>> getComments(
             @PathVariable Long taskId,
             @RequestParam(required = false , defaultValue = "0") int page,
             @RequestParam(required = false , defaultValue = "10") int size,
             @RequestParam(required = false , defaultValue = "newest") String sort) {
 
         // 정렬 방향 결정
-        Sort.Direction direction = sort.equals("oldest")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
+        Sort.Direction direction = sort.equals("newest")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
 
         // Pageable 생성 + 정렬
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
 
         // 댓글 조회
-        Page<ReadCommentResponse> commentsPage = commentService.getComments(taskId, pageable);
+        Page<CommentResponseDto> commentsPage = commentService.getComments(taskId, pageable);
 
         // PageResponse 생성
-        PageResponse<ReadCommentResponse> pageResponse = PageResponse.success(
+        PageResponse<CommentResponseDto> pageResponse = PageResponse.success(
                 "댓글 목록을 조회했습니다.",
                 commentsPage
         );
@@ -87,13 +87,13 @@ public class CommentController {
      * 댓글 수정
      */
     @PutMapping("/tasks/{taskId}/comments/{commentId}")
-    public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
+    public ResponseEntity<ApiResponse<UpdateCommentResponse>> updateComment(
             @PathVariable Long taskId,
             @PathVariable Long commentId,
             @Valid @RequestBody UpdateCommentRequest request,
             @AuthenticationPrincipal AuthUserDto authUserDto) {
 
-        CommentResponseDto responseDto = commentService.updateComment(
+        UpdateCommentResponse responseDto = commentService.updateComment(
                 taskId,
                 commentId,
                 request,
