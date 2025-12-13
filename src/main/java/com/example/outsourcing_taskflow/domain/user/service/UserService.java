@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.user.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
@@ -27,6 +28,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@MeasureAllMethods
 public class UserService {
 
     private final UserRepository userRepository;

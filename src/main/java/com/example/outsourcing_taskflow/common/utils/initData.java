@@ -1,9 +1,11 @@
 package com.example.outsourcing_taskflow.common.utils;
 
 import com.example.outsourcing_taskflow.common.entity.*;
+import com.example.outsourcing_taskflow.common.enums.ActivityType;
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
 import com.example.outsourcing_taskflow.domain.activitylog.repository.ActivityLogRepository;
+import com.example.outsourcing_taskflow.domain.activitylog.service.ActivityLogService;
 import com.example.outsourcing_taskflow.domain.comment.repository.CommentRepository;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
@@ -33,7 +35,7 @@ public class initData implements ApplicationRunner {
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
-    private final ActivityLogRepository activityLogRepository;
+    private final ActivityLogService activityLogService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -53,20 +55,28 @@ public class initData implements ApplicationRunner {
 
         // ===== 1. 사용자 생성 =====
 
-        User user1 = new User("johndoe", "john@example.com",
-                passwordEncoder.encode("Password123!"), "John Doe");
+        User user1 = new User("JYJ", "JYJ@example.com",
+                passwordEncoder.encode("Password123!"), "정용준");
         user1.updateAdminRole();
         userRepository.save(user1);
 
-        User user2 = new User("janedoe", "jane@example.com",
-                passwordEncoder.encode("Password123!"), "Jane Doe");
+        User user2 = new User("KDW", "KDW@example.com",
+                passwordEncoder.encode("Password123!"), "김동욱");
         userRepository.save(user2);
 
-        User user3 = new User("leeyounghe", "younghee@example.com",
-                passwordEncoder.encode("Password123!"), "이영희");
+        User user3 = new User("KJH", "KJH@example.com",
+                passwordEncoder.encode("Password123!"), "김재환");
         userRepository.save(user3);
 
-        log.info("✅ 사용자 3명 생성 완료");
+        User user4 = new User("CJY", "CJY@example.com",
+                passwordEncoder.encode("Password123!"), "최정윤");
+        userRepository.save(user4);
+
+        User user5 = new User("IJH", "IJH@example.com",
+                passwordEncoder.encode("Password123!"), "임정하");
+        userRepository.save(user5);
+
+        log.info("✅ 사용자 5명 생성 완료");
 
         // ===== 2. Team 생성 =====
         Team team1 = new Team("FE 연동", "프론트엔드 연동 팀");
@@ -88,14 +98,21 @@ public class initData implements ApplicationRunner {
 
         // ===== 3. Member 생성 =====
         memberRepository.save(new Member(team1, user1));
-        memberRepository.save(new Member(team3, user1));
         memberRepository.save(new Member(team1, user2));
-        memberRepository.save(new Member(team2, user2));
-        memberRepository.save(new Member(team4, user2));
-        memberRepository.save(new Member(team2, user3));
-        memberRepository.save(new Member(team5, user3));
 
-        log.info("✅ Member 7개 생성 완료");
+        memberRepository.save(new Member(team2, user2));
+        memberRepository.save(new Member(team2, user3));
+        memberRepository.save(new Member(team2, user4));
+
+        memberRepository.save(new Member(team3, user5));
+
+        memberRepository.save(new Member(team4, user1));
+
+        memberRepository.save(new Member(team5, user3));
+        memberRepository.save(new Member(team5, user4));
+        memberRepository.save(new Member(team5, user5));
+
+        log.info("✅ Member 10개 생성 완료");
 
         // ===== 4. Task 생성 (다양한 생성 날짜) =====
 
@@ -327,6 +344,34 @@ public class initData implements ApplicationRunner {
         log.info("✅ Comment 15개 생성 완료 (일반 댓글 8개 + 대댓글 7개)");
 
         // ===== 6. ActivityLog 생성 =====
+        activityLogService.log(ActivityType.TASK_CREATED, user1, task1, task1.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user1, task2, task2.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user2, task2, task2.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user2, task3, task3.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user2, task3, task3.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user3, task4, task4.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user3, task5, task5.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user3, task6, task6.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user4, task7, task7.getTitle());
+        activityLogService.log(ActivityType.TASK_CREATED, user5, task8, task8.getTitle());
+
+        activityLogService.log(ActivityType.TASK_UPDATED, user1, task1, task1.getTitle());
+        activityLogService.log(ActivityType.TASK_UPDATED, user2, task2, task2.getTitle());
+        activityLogService.log(ActivityType.TASK_UPDATED, user2, task3, task3.getTitle());
+        activityLogService.log(ActivityType.TASK_UPDATED, user3, task4, task4.getTitle());
+        activityLogService.log(ActivityType.TASK_UPDATED, user3, task5, task5.getTitle());
+
+        activityLogService.log(ActivityType.COMMENT_CREATED, user1, task1, task1.getTitle());
+        activityLogService.log(ActivityType.COMMENT_CREATED, user2, task2, task2.getTitle());
+        activityLogService.log(ActivityType.COMMENT_CREATED, user2, task2, task2.getTitle());
+        activityLogService.log(ActivityType.COMMENT_CREATED, user3, task4, task4.getTitle());
+        activityLogService.log(ActivityType.COMMENT_CREATED, user3, task4, task4.getTitle());
+
+        activityLogService.log(ActivityType.COMMENT_UPDATED, user1, task1);
+        activityLogService.log(ActivityType.COMMENT_UPDATED, user2, task2);
+        activityLogService.log(ActivityType.COMMENT_UPDATED, user2, task3);
+        activityLogService.log(ActivityType.COMMENT_UPDATED, user3, task4);
+        activityLogService.log(ActivityType.COMMENT_UPDATED, user3, task5);
 
         log.info("========================================");
         log.info("🎉 초기 데이터 생성 완료!");

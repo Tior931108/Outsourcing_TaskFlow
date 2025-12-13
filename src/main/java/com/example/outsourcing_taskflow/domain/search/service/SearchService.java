@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.search.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.domain.search.model.dto.SearchTaskResultDto;
 import com.example.outsourcing_taskflow.domain.search.model.dto.SearchTeamResultDto;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@MeasureAllMethods
 public class SearchService {
 // - Properties
     private final TaskRepository taskRepository;

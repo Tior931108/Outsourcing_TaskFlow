@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.team.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
@@ -33,6 +34,7 @@ import static com.example.outsourcing_taskflow.common.enums.ErrorMessage.*;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
+@MeasureAllMethods
 public class TeamService {
 
     private final TeamRepository teamRepository;
