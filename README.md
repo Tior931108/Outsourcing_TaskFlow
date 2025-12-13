@@ -1,8 +1,11 @@
-# TaskFlow 백엔드 팀 프로젝트 과제
+# Outsourcing_TaskFlow 백엔드 팀 프로젝트 과제
 
 ## 📌 프로젝트 소개
-본 프로젝트는 부트캠프 
-
+본 프로젝트는 기업용 태스크 관리 시스템 (TaskFlow)을 주제로 한 아웃소싱 프로젝트입니다. <br>
+예시로 제작된 프론트엔드 결과물에 맞춰 백엔드 API 서버를 구현했습니다.
+모든 API는 사전에 정의된 API 명세서와 일치하도록 작성했으며,<br>공용 응답 객체를 사용해 통일된 형식으로 결과 값을 반환하도록 구현했습니다.
+<br/>
+<br/>
 
 ## 🛠 기술 스택
 
@@ -26,6 +29,7 @@
 - **API Test**: Postman
 - **Version Control**: Git, GitHub
 
+<br>
 
 ---
 
@@ -35,6 +39,8 @@
 - 회원가입 / 로그인
 - JWT 기반 인증
 - 사용자 프로필 조회
+- 사용자 정보 수정
+- 회원탈퇴
 
 ### 📋 작업 관리
 - 작업 생성 / 조회 / 수정 / 삭제
@@ -67,9 +73,10 @@
 - 공통 응답 포맷 적용
 - 전역 예외 처리
 - CORS 설정
-  - 개발 환경: `http://localhost:3000`
+- 개발 환경: `http://localhost:3000`
 
 ---
+<br>
 
 ## 🐳 실행 방법
 
@@ -84,20 +91,26 @@ docker run -p 3000:3000 [frontend-image]
 ./gradlew bootRun
 ```
 
+<br>
 
 ## 🗓 개발 기간
-- 2025.11.07 ~ 2025.11.20
+- 2025.12.09 ~ 2025.12.13
 <br>
 
 ## 🗂 ERD
-
 <img width="1700" height="902" alt="image" src="https://github.com/user-attachments/assets/2eaf3bf9-dffd-4c28-86c1-8da86732fd65" />
 <br>
 
-
+<br>
 
 ## 📘 API 명세서
-Postman API 문서를 통해 각 API의 요청/응답 예시를 확인할 수 있습니다.  
-👉 [API 명세서 바로가기](https://documenter.getpostman.com/view/47338059/2sB3WyKGKL)
+👉 [API 명세서 바로가기](https://teamsparta.notion.site/TaskFlow-API-2c32dc3ef51481139566e0201d71fe44) <br>
+👉 [API 명세서 바로가기](https://www.notion.so/teamsparta/8-2bc2dc3ef51480c9abd9d547dc1dd16f?source=copy_link#2bc2dc3ef51481d1add2f0496ab36195) 
+<br>
+<img width="706" height="656" alt="image" src="https://github.com/user-attachments/assets/2b849b47-0991-494c-8b5c-353a96c8bced" />
+<img width="705" height="745" alt="image" src="https://github.com/user-attachments/assets/ee55614f-a9c3-4e3f-8a4b-cea1a2aea147" />
+
 <br><br>
 
+## 👤 개발자
+Spring 심화 팀 프로젝트 8조 팔방미인즈 정용준, 김동욱, 임정하, 최정윤, 김재환
