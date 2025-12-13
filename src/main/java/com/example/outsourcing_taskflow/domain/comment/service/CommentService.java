@@ -4,9 +4,11 @@ import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
+import com.example.outsourcing_taskflow.common.enums.ActivityType;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
+import com.example.outsourcing_taskflow.domain.activitylog.service.ActivityLogService;
 import com.example.outsourcing_taskflow.domain.comment.model.response.UpdateCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
@@ -34,6 +36,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
 
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getComments(Long taskId, Pageable pageable) {
@@ -129,6 +132,9 @@ public class CommentService {
         // 4. 저장 및 반환
         Comment savedComment = commentRepository.save(comment);
 
+        // 5. 활동 로그 저장
+        activityLogService.log(ActivityType.COMMENT_CREATED, user, task, task.getTitle());
+
         return CreateCommentResponse.from(savedComment);
     }
 
@@ -184,7 +190,10 @@ public class CommentService {
         comment.updateContent(request.getContent());
         commentRepository.flush();
 
-        // 5. 변경 감지로 자동 저장됨 (Dirty Checking)
+        // 5. 활동 로그 저장
+        activityLogService.log(ActivityType.COMMENT_UPDATED, comment.getUser(), comment.getTask());
+
+        // 6. 변경 감지로 자동 저장됨 (Dirty Checking)
         return UpdateCommentResponse.from(comment);
     }
 
@@ -213,6 +222,9 @@ public class CommentService {
             // 대댓글 → 해당 댓글만 삭제
             comment.delete();
         }
+
+        // 5. 활동 로그 저장
+        activityLogService.log(ActivityType.COMMENT_DELETED, comment.getUser(), comment.getTask());
     }
 
     /**

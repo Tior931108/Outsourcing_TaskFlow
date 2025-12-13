@@ -33,8 +33,9 @@ public class ActivityLogService {
     public void log(ActivityType type,
                     User user,
                     Task task,
-                    String description) {
+                    Object... args) {
         // - Create Log
+        String description = type.format(args);
         ActivityLog log = ActivityLog.of(type, user, task, description);
         // - Save Log
         activityLogRepository.save(log);
