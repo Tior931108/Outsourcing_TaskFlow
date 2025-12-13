@@ -3,7 +3,7 @@
 ## 📌 프로젝트 소개
 본 프로젝트는 기업용 태스크 관리 시스템 (TaskFlow)을 주제로 한 아웃소싱 프로젝트입니다. <br>
 예시로 제작된 프론트엔드 결과물에 맞춰 백엔드 API 서버를 구현했습니다.
-모든 API는 사전에 정의된 API 명세서와 일치하도록 작성했으며,<br>공용 응답 객체를 사용해 통일된 형식으로 결과 값을 반환하도록 구현했습니다.
+모든 API는 사전에 정의된 API 명세서와 일치하도록 작성했으며, 공용 응답 객체를 사용해 통일된 형식으로 결과 값을 반환하도록 구현했습니다.
 <br/>
 <br/>
 
@@ -104,9 +104,7 @@ docker run -p 3000:3000 [frontend-image]
 <br>
 
 ## 📘 API 명세서
-👉 [API 명세서 바로가기](https://teamsparta.notion.site/TaskFlow-API-2c32dc3ef51481139566e0201d71fe44) <br>
-👉 [API 명세서 바로가기](https://www.notion.so/teamsparta/8-2bc2dc3ef51480c9abd9d547dc1dd16f?source=copy_link#2bc2dc3ef51481d1add2f0496ab36195) 
-<br>
+👉 [API 명세서 바로가기](https://teamsparta.notion.site/TaskFlow-API-2c32dc3ef51481139566e0201d71fe44) <br><br>
 <img width="706" height="656" alt="image" src="https://github.com/user-attachments/assets/2b849b47-0991-494c-8b5c-353a96c8bced" />
 <img width="705" height="745" alt="image" src="https://github.com/user-attachments/assets/ee55614f-a9c3-4e3f-8a4b-cea1a2aea147" />
 
