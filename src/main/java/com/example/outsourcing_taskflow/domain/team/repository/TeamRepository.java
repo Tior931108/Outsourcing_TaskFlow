@@ -24,7 +24,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
         select t
         from Team t
         where lower(t.teamName) like lower(concat('%', :keyword, '%'))
-        and t.isDeleted = :isDeleted
         """)
     List<Team> searchByKeyword(@Param("keyword") String keyword);
 
