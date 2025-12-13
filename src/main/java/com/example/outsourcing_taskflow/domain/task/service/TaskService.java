@@ -3,11 +3,9 @@ package com.example.outsourcing_taskflow.domain.task.service;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
-import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
-import com.example.outsourcing_taskflow.common.enums.IsDeleted;
-import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
-import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
+import com.example.outsourcing_taskflow.common.enums.*;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
+import com.example.outsourcing_taskflow.domain.activitylog.service.ActivityLogService;
 import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
 import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
@@ -32,6 +30,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
 
 // ---------------------------------------------------------------------------------------------------------------------
     public CreateTaskResponse createTask(CreateTaskRequest request) {
@@ -55,6 +54,8 @@ public class TaskService {
         );
 
         Task savedTask = taskRepository.save(createdTask);
+
+        activityLogService.log(ActivityType.TASK_CREATED, user, createdTask, createdTask.getTitle());
 
         return CreateTaskResponse.from(savedTask);
     }
@@ -183,6 +184,12 @@ public class TaskService {
 
         // 엔티티 업데이트
         task.update(request, newAssignee);
+
+        // 활동 로그 저장
+        User loguser = userRepository.findById(authUserDto.getId())
+                        .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_USER));
+        activityLogService.log(ActivityType.TASK_UPDATED, loguser, task, task.getTitle());
+
         // 변경 감지(Dirty Checking)에 의해 자동 업데이트
         return UpdateTaskResponse.from(task);
     }
@@ -207,6 +214,11 @@ public class TaskService {
         if (!isAssignee && !isAdmin) {
             throw new CustomException(ErrorMessage.NOT_TASK_DELETE_AUTHORIZED);
         }
+
+        // 활동 로그 저장
+        User loguser = userRepository.findById(authUserDto.getId())
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_USER));
+        activityLogService.log(ActivityType.TASK_DELETED, loguser, task, task.getTitle());
 
         task.softDelete();
 
@@ -254,6 +266,11 @@ public class TaskService {
         }
 
         task.updateStatus(newStatus);
+
+        // 활동 로그 저장
+        User loguser = userRepository.findById(authUserDto.getId())
+                .orElseThrow(() -> new CustomException(ErrorMessage.NOT_FOUND_USER));
+        activityLogService.log(ActivityType.TASK_STATUS_CHANGED, loguser, task, currentStatus.name(), newStatus.name());
 
         return UpdateTaskStatusResponse.from(task);
     }

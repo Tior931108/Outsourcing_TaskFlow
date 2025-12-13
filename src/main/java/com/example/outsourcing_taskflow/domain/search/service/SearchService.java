@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.search.service;
 
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.domain.search.model.dto.SearchTaskResultDto;
 import com.example.outsourcing_taskflow.domain.search.model.dto.SearchTeamResultDto;
 import com.example.outsourcing_taskflow.domain.search.model.dto.SearchUserResultDto;
@@ -26,13 +27,13 @@ public class SearchService {
     public GetSearchResponse search(String keyword) {
         // - Search Task
         List<SearchTaskResultDto> taskResults = taskRepository
-                .searchByKeyword(keyword)
+                .searchByKeyword(keyword, IsDeleted.FALSE)
                 .stream()
                 .map(SearchTaskResultDto::from)
                 .toList();
         // - Search User
         List<SearchUserResultDto> userResults = userRepository
-                .searchByKeyword(keyword)
+                .searchByKeyword(keyword, IsDeleted.FALSE)
                 .stream()
                 .map(SearchUserResultDto::from)
                 .toList();
