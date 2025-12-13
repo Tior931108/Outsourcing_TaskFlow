@@ -42,13 +42,6 @@ public class CommentService {
             throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
         }
 
-//        // DTO projection으로 직접 페이징 조회 (필요한 필드만)
-//        return commentRepository.findCommentDtosByTaskId(
-//                taskId,
-//                IsDeleted.FALSE,
-//                pageable
-//        );
-
         // 1. 모든 댓글 조회 (부모 + 자식)
         List<CommentResponseDto> allComments = commentRepository.findAllCommentsByTaskId(
                 taskId,
