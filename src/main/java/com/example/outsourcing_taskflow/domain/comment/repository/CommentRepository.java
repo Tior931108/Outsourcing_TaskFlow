@@ -2,7 +2,7 @@ package com.example.outsourcing_taskflow.domain.comment.repository;
 
 import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
-import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +18,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * 페이징은 애플리케이션 레벨에서 처리
      * DTO 프로젝션으로 원하는 컬럼만 추출 + (N+1)문제 해결
      */
-    @Query("SELECT new com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto(" +
+    @Query("SELECT new com.example.outsourcing_taskflow.domain.comment.model.dto.CommentDto(" +
             "c.id, " +
             "c.content, " +
             "c.task.id, " +
@@ -35,7 +35,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "JOIN c.task " +
             "WHERE c.task.id = :taskId " +
             "AND c.isDeleted = :isDeleted")
-    List<CommentResponseDto> findAllCommentsByTaskId(
+    List<CommentDto> findAllCommentsByTaskId(
             @Param("taskId") Long taskId,
             @Param("isDeleted") IsDeleted isDeleted);
 

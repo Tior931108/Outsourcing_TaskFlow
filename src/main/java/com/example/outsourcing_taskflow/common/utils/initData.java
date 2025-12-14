@@ -382,7 +382,7 @@ public class initData implements ApplicationRunner {
         log.info("   - Members: 7개");
         log.info("   - Tasks: 8개 (6일 전~오늘)");
         log.info("   - Comments: 15개 (일반 8개 + 대댓글 7개)");
-        log.info("   - ActivityLogs: 0개 [로그 AOP 구현 완료되는대로 테스트 진행]");
+        log.info("   - ActivityLogs: 25개");
         log.info("========================================");
     }
 

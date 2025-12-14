@@ -2,7 +2,6 @@ package com.example.outsourcing_taskflow.domain.activitylog.model.response;
 
 import com.example.outsourcing_taskflow.common.entity.ActivityLog;
 import com.example.outsourcing_taskflow.domain.activitylog.model.dto.ActivityUserDto;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

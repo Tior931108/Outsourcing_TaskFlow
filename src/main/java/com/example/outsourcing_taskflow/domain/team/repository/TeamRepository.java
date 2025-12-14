@@ -12,13 +12,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     Optional<Team> findById(Long id);
 
-    // Optional<Team> findByIdAndIsDeletedFalse(Long id);
-
     Optional<Team> findByTeamNameAndIsDeletedFalse(String teamName);
-
-    List<Team> findAllByIsDeletedFalse();
-
-    boolean existsByIdAndIsDeletedFalse(Long teamId);
 
     @Query("""
         select t

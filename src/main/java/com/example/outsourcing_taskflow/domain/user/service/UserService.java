@@ -1,13 +1,11 @@
 package com.example.outsourcing_taskflow.domain.user.service;
 
 import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
-import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.common.config.security.JwtUtil;
+import com.example.outsourcing_taskflow.common.security.JwtUtil;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;

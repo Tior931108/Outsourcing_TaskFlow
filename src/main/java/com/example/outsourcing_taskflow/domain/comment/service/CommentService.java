@@ -1,7 +1,7 @@
 package com.example.outsourcing_taskflow.domain.comment.service;
 
 import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
@@ -14,7 +14,7 @@ import com.example.outsourcing_taskflow.domain.comment.model.response.UpdateComm
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
-import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentDto;
 import com.example.outsourcing_taskflow.domain.comment.repository.CommentRepository;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
@@ -41,14 +41,14 @@ public class CommentService {
     private final ActivityLogService activityLogService;
 
     @Transactional(readOnly = true)
-    public Page<CommentResponseDto> getComments(Long taskId, Pageable pageable) {
+    public Page<CommentDto> getComments(Long taskId, Pageable pageable) {
         // 404 : 작업 ID 존재 여부
         if (!taskRepository.existsById(taskId)) {
             throw new CustomException(ErrorMessage.NOT_FOUND_TASK);
         }
 
         // 1. 모든 댓글 조회 (부모 + 자식)
-        List<CommentResponseDto> allComments = commentRepository.findAllCommentsByTaskId(
+        List<CommentDto> allComments = commentRepository.findAllCommentsByTaskId(
                 taskId,
                 IsDeleted.FALSE
         );
@@ -59,10 +59,10 @@ public class CommentService {
         }
 
         // 3. 부모 댓글과 대댓글 분리
-        List<CommentResponseDto> parentComments = new ArrayList<>();
-        Map<Long, List<CommentResponseDto>> repliesByParentId = new HashMap<>();
+        List<CommentDto> parentComments = new ArrayList<>();
+        Map<Long, List<CommentDto>> repliesByParentId = new HashMap<>();
 
-        for (CommentResponseDto comment : allComments) {
+        for (CommentDto comment : allComments) {
             if (comment.getParentId() == null) {
                 // 부모 댓글
                 parentComments.add(comment);
@@ -76,25 +76,25 @@ public class CommentService {
 
         // 4. 부모 댓글 정렬 (메모리에서 정렬 처리)
         Sort.Order order = pageable.getSort().iterator().next();
-        Comparator<CommentResponseDto> comparator = order.getDirection() == Sort.Direction.ASC
-                ? Comparator.comparing(CommentResponseDto::getCreatedAt)
-                : Comparator.comparing(CommentResponseDto::getCreatedAt).reversed();
+        Comparator<CommentDto> comparator = order.getDirection() == Sort.Direction.ASC
+                ? Comparator.comparing(CommentDto::getCreatedAt)
+                : Comparator.comparing(CommentDto::getCreatedAt).reversed();
 
         parentComments.sort(comparator);
 
         // 5. 각 대댓글 그룹을 오래된 순으로 정렬
-        for (List<CommentResponseDto> replies : repliesByParentId.values()) {
-            replies.sort(Comparator.comparing(CommentResponseDto::getCreatedAt));
+        for (List<CommentDto> replies : repliesByParentId.values()) {
+            replies.sort(Comparator.comparing(CommentDto::getCreatedAt));
         }
 
         // 6. 부모 댓글과 대댓글을 순서대로 조합 (플랫 리스트)
-        List<CommentResponseDto> orderedComments = new ArrayList<>();
-        for (CommentResponseDto parent : parentComments) {
+        List<CommentDto> orderedComments = new ArrayList<>();
+        for (CommentDto parent : parentComments) {
             // 부모 댓글 추가
             orderedComments.add(parent);
 
             // 해당 부모의 대댓글들 추가
-            List<CommentResponseDto> replies = repliesByParentId.get(parent.getId());
+            List<CommentDto> replies = repliesByParentId.get(parent.getId());
             if (replies != null && !replies.isEmpty()) {
                 orderedComments.addAll(replies);
             }
@@ -110,7 +110,7 @@ public class CommentService {
             return new PageImpl<>(Collections.emptyList(), pageable, totalElements);
         }
 
-        List<CommentResponseDto> pageContent = orderedComments.subList(start, end);
+        List<CommentDto> pageContent = orderedComments.subList(start, end);
 
         return new PageImpl<>(pageContent, pageable, totalElements);
     }

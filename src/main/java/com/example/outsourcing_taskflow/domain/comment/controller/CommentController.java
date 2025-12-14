@@ -1,13 +1,13 @@
 package com.example.outsourcing_taskflow.domain.comment.controller;
 
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.response.UpdateCommentResponse;
 import com.example.outsourcing_taskflow.domain.comment.model.request.CreateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.request.UpdateCommentRequest;
 import com.example.outsourcing_taskflow.domain.comment.model.response.CreateCommentResponse;
-import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentResponseDto;
+import com.example.outsourcing_taskflow.domain.comment.model.dto.CommentDto;
 import com.example.outsourcing_taskflow.domain.comment.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class CommentController {
      * @return 댓글 조회 페이징 반환
      */
     @GetMapping("/tasks/{taskId}/comments")
-    public ResponseEntity<PageResponse<CommentResponseDto>> getComments(
+    public ResponseEntity<PageResponse<CommentDto>> getComments(
             @PathVariable Long taskId,
             @RequestParam(required = false , defaultValue = "0") int page,
             @RequestParam(required = false , defaultValue = "10") int size,
@@ -51,10 +51,10 @@ public class CommentController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
 
         // 댓글 조회
-        Page<CommentResponseDto> commentsPage = commentService.getComments(taskId, pageable);
+        Page<CommentDto> commentsPage = commentService.getComments(taskId, pageable);
 
         // PageResponse 생성
-        PageResponse<CommentResponseDto> pageResponse = PageResponse.success(
+        PageResponse<CommentDto> pageResponse = PageResponse.success(
                 "댓글 목록을 조회했습니다.",
                 commentsPage
         );

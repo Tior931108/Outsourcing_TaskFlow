@@ -1,7 +1,7 @@
 package com.example.outsourcing_taskflow.domain.team.service;
 
 import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Member;
 import com.example.outsourcing_taskflow.common.entity.Team;
 import com.example.outsourcing_taskflow.common.entity.User;
@@ -9,13 +9,13 @@ import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
-import com.example.outsourcing_taskflow.domain.member.dto.response.MemberListResponseDto;
-import com.example.outsourcing_taskflow.domain.member.dto.response.MemberDetailReasponseDto;
+import com.example.outsourcing_taskflow.domain.member.model.response.MemberListResponseDto;
+import com.example.outsourcing_taskflow.domain.member.model.response.MemberDetailReasponseDto;
 import com.example.outsourcing_taskflow.domain.member.repository.MemberRepository;
-import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.response.*;
+import com.example.outsourcing_taskflow.domain.team.model.request.CreateTeamMemberRequest;
+import com.example.outsourcing_taskflow.domain.team.model.request.CreateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.model.request.UpdateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.model.response.*;
 import com.example.outsourcing_taskflow.domain.team.repository.TeamRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -117,14 +117,6 @@ public class TeamService {
     public UpdateTeamResponse updateTeam(Long teamId, UpdateTeamRequest request, AuthUserDto authUserDto) {
 
         // 권한 검증
-//        if (!UserRoleEnum.ADMIN.equals(authUserDto.getRole())) {
-//            throw new CustomException(NOT_MODIFY_AUTHORIZED);
-//        }
-
-        // [현재 접속중인 사용자] = ![작업 담당자] && ![관리자] -> 403 Forbidden: 수정 권한 없음
-        // authUserDto에 현재 접속중인 사용자 id, username, role이 담겨있음
-
-        // 권한 검증
         boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
         if (!isAdmin) {
             throw new CustomException(ErrorMessage.NOT_MODIFY_AUTHORIZED);
@@ -187,10 +179,10 @@ public class TeamService {
         // 현재 팀 멤버 전체 조회
         List<Member> updatedMembers = memberRepository.findAllByTeamIdWithUser(teamId);
 
-        List<TeamMemberResponseDto> memberResponses = new ArrayList<>();
+        List<TeamMemberResponse> memberResponses = new ArrayList<>();
 
         for (Member member : updatedMembers) {
-            TeamMemberResponseDto response = new TeamMemberResponseDto(member.getUser());
+            TeamMemberResponse response = new TeamMemberResponse(member.getUser());
             memberResponses.add(response);
         }
 
@@ -199,7 +191,7 @@ public class TeamService {
 
     // 팀 멤버 조회
     @Transactional(readOnly = true)
-    public List<TeamMemberResponseDto> getTeamMembers(Long teamId) {
+    public List<TeamMemberResponse> getTeamMembers(Long teamId) {
 
         boolean exists = teamRepository.existsById(teamId);
 
@@ -209,13 +201,13 @@ public class TeamService {
 
         List<Member> members = memberRepository.findAllByTeamIdWithUser(teamId);
 
-        List<TeamMemberResponseDto> memberResponses = new ArrayList<>();
+        List<TeamMemberResponse> memberResponses = new ArrayList<>();
 
         for (Member member : members) {
 
             // 탈퇴한 멤버 제외하고, 팀의 멤버 조회
             if (member.getUser().getIsDeleted().equals(IsDeleted.FALSE)) {
-                TeamMemberResponseDto memberResponse = new TeamMemberResponseDto(member.getUser());
+                TeamMemberResponse memberResponse = new TeamMemberResponse(member.getUser());
                 memberResponses.add(memberResponse);
             }
         }
@@ -226,10 +218,6 @@ public class TeamService {
     // 팀 멤버 삭제
     public void deleteTeamMember(Long teamId, Long userId, AuthUserDto authUserDto) {
 
-        // 권한 검증
-//        if (!UserRoleEnum.ADMIN.equals(authUserDto.getRole())) {
-//            throw new CustomException(NOT_REMOVE_AUTHORIZED);
-//        }
         // 권한 검증
         boolean isAdmin = authUserDto.getRole().equals(UserRoleEnum.ADMIN.getRole()); // JWT로부터 role을 String 권한으로 주입할 때 "ROLE_ADMIN" 형태인지 확인
         if (!isAdmin) {

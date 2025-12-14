@@ -1,15 +1,15 @@
 package com.example.outsourcing_taskflow.domain.task.controller;
 
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskStatusResponse;
+import com.example.outsourcing_taskflow.domain.task.model.request.CreateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.model.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.model.request.UpdateTaskStatusRequest;
+import com.example.outsourcing_taskflow.domain.task.model.response.CreateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.GetTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.UpdateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.UpdateTaskStatusResponse;
 import com.example.outsourcing_taskflow.domain.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
