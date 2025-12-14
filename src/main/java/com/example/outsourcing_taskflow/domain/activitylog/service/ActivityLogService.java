@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.activitylog.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.entity.ActivityLog;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@MeasureAllMethods
 public class ActivityLogService {
 // - Properties
     private final ActivityLogRepository activityLogRepository;

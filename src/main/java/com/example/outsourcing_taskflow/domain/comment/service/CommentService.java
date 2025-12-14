@@ -1,5 +1,6 @@
 package com.example.outsourcing_taskflow.domain.comment.service;
 
+import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
 import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Comment;
 import com.example.outsourcing_taskflow.common.entity.Task;
@@ -31,6 +32,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@MeasureAllMethods
 public class CommentService {
 
     private final CommentRepository commentRepository;
