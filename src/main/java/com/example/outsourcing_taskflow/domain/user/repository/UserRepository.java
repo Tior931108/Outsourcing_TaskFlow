@@ -1,8 +1,29 @@
 package com.example.outsourcing_taskflow.domain.user.repository;
 
 import com.example.outsourcing_taskflow.common.entity.User;
+import com.example.outsourcing_taskflow.common.enums.IsDeleted;
+import jakarta.validation.constraints.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    boolean existsByUserName(String userName);
+
+    boolean existsByEmail(@Email(message = "올바른 이메일 형식이 아닙니다.") String email);
+
+    Optional<User> findByUserName(String userName);
+
+    // - Search By Keyword
+    @Query("""
+        select u
+        from User u
+        where lower(u.name) like lower(concat('%', :keyword, '%'))
+          and u.isDeleted = :isDeleted
+        """)
+    List<User> searchByKeyword(@Param("keyword") String keyword, @Param("isDeleted") IsDeleted isDelete);
 
 }

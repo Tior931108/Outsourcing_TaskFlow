@@ -23,4 +23,10 @@ public class Member {
     @JoinColumn(name = "team_id")
     private Team team; // 팀 FK
 
+    // 생성자
+    public Member(Team team, User user) {
+        this.team = team;
+        this.user = user;
+    }
+
 }

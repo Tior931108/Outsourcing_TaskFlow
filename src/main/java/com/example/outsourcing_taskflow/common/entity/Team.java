@@ -26,4 +26,24 @@ public class Team extends BaseEntity{
     @Builder.Default
     private IsDeleted isDeleted = IsDeleted.FALSE; // 삭제 여부
 
+    public Team(String teamName, String description) {
+        this.teamName = teamName;
+        this.description = description;
+        this.isDeleted = IsDeleted.FALSE;
+    }
+
+    // 업데이트 기능
+    public void update(String teamName,String description) {
+        if (teamName != null && !teamName.trim().isEmpty()) {
+            this.teamName = teamName.trim();
+        }
+        if (description != null && !description.trim().isEmpty()) {
+            this.description = description.trim();
+        }
+    }
+
+    // 소프트 딜리트 기능
+    public void softDelete() {
+        this.isDeleted = IsDeleted.TRUE;
+    }
 }
