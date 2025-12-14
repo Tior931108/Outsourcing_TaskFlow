@@ -8,8 +8,6 @@ import com.example.outsourcing_taskflow.common.enums.ActivityType;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetActivityLogResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetMyActivityLogResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.repository.ActivityLogRepository;
-import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
-import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,8 +24,6 @@ import java.time.LocalDateTime;
 public class ActivityLogService {
 // - Properties
     private final ActivityLogRepository activityLogRepository;
-    private final UserRepository userRepository;
-    private final TaskRepository taskRepository;
 
 // - Methods
     // - Log

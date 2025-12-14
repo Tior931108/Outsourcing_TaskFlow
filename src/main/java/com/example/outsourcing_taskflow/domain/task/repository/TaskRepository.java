@@ -14,15 +14,6 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    // 상태로 작업을 검색
-    Page<Task> findByStatus(TaskStatusEnum status, Pageable pageable);
-
-    // 담당자로 작업을 검색
-    Page<Task> findByAssigneeId(Long assigneeId, Pageable pageable);
-
-    // 상태+담당자로 작업을 검색
-    Page<Task> findByStatusAndAssigneeId(TaskStatusEnum status, Long assigneeId, Pageable pageable);
-
     // 상태 + 삭제 여부
     Page<Task> findByStatusAndIsDeleted(TaskStatusEnum status, IsDeleted isDeleted, Pageable pageable);
 

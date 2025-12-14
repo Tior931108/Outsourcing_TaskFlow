@@ -1,11 +1,11 @@
 package com.example.outsourcing_taskflow.domain.team.controller;
 
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.ApiResponse;
-import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamMemberRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.request.CreateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.request.UpdateTeamRequest;
-import com.example.outsourcing_taskflow.domain.team.dto.response.*;
+import com.example.outsourcing_taskflow.domain.team.model.request.CreateTeamMemberRequest;
+import com.example.outsourcing_taskflow.domain.team.model.request.CreateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.model.request.UpdateTeamRequest;
+import com.example.outsourcing_taskflow.domain.team.model.response.*;
 import com.example.outsourcing_taskflow.domain.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -94,13 +94,13 @@ public class TeamController {
 
     // 팀 멤버 조회 API
     @GetMapping("/{teamId}/members")
-    public ResponseEntity<ApiResponse<List<TeamMemberResponseDto>>> getTeamMemberApi(
+    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMemberApi(
             @PathVariable Long teamId) {
 
-        List<TeamMemberResponseDto> teamMemberResponseDto = teamService.getTeamMembers(teamId);
+        List<TeamMemberResponse> teamMemberResponse = teamService.getTeamMembers(teamId);
 
         return ResponseEntity.ok(
-                ApiResponse.success("팀 멤버 조회 성공", teamMemberResponseDto));
+                ApiResponse.success("팀 멤버 조회 성공", teamMemberResponse));
     }
 
     // 팀 멤버 제거 API

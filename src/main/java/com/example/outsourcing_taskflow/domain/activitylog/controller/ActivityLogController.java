@@ -1,8 +1,6 @@
 package com.example.outsourcing_taskflow.domain.activitylog.controller;
 
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
-import com.example.outsourcing_taskflow.common.entity.User;
-import com.example.outsourcing_taskflow.common.response.ApiResponse;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.response.PageResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetActivityLogResponse;
 import com.example.outsourcing_taskflow.domain.activitylog.model.response.GetMyActivityLogResponse;

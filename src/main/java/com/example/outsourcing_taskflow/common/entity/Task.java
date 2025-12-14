@@ -3,7 +3,7 @@ package com.example.outsourcing_taskflow.common.entity;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskPriorityEnum;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;
-import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.model.request.UpdateTaskRequest;
 import jakarta.persistence.*;
 import lombok.*;
 

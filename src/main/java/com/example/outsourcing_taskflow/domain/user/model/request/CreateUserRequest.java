@@ -1,6 +1,5 @@
 package com.example.outsourcing_taskflow.domain.user.model.request;
 
-import com.example.outsourcing_taskflow.common.enums.ErrorMessage;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

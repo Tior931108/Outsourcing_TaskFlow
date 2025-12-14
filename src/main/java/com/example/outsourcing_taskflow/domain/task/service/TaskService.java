@@ -1,19 +1,19 @@
 package com.example.outsourcing_taskflow.domain.task.service;
 
 import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.*;
 import com.example.outsourcing_taskflow.common.exception.CustomException;
 import com.example.outsourcing_taskflow.domain.activitylog.service.ActivityLogService;
-import com.example.outsourcing_taskflow.domain.task.dto.request.CreateTaskRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.request.UpdateTaskStatusRequest;
-import com.example.outsourcing_taskflow.domain.task.dto.response.CreateTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.GetTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskResponse;
-import com.example.outsourcing_taskflow.domain.task.dto.response.UpdateTaskStatusResponse;
+import com.example.outsourcing_taskflow.domain.task.model.request.CreateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.model.request.UpdateTaskRequest;
+import com.example.outsourcing_taskflow.domain.task.model.request.UpdateTaskStatusRequest;
+import com.example.outsourcing_taskflow.domain.task.model.response.CreateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.GetTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.UpdateTaskResponse;
+import com.example.outsourcing_taskflow.domain.task.model.response.UpdateTaskStatusResponse;
 import com.example.outsourcing_taskflow.domain.task.repository.TaskRepository;
 import com.example.outsourcing_taskflow.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;

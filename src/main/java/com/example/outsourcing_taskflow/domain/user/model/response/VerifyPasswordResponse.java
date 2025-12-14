@@ -1,6 +1,5 @@
 package com.example.outsourcing_taskflow.domain.user.model.response;
 
-import com.example.outsourcing_taskflow.domain.user.model.request.VerifyPasswordRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

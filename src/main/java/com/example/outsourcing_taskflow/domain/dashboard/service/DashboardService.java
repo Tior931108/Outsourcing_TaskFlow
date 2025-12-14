@@ -1,7 +1,7 @@
 package com.example.outsourcing_taskflow.domain.dashboard.service;
 
 import com.example.outsourcing_taskflow.common.annotaion.MeasureAllMethods;
-import com.example.outsourcing_taskflow.common.config.security.auth.AuthUserDto;
+import com.example.outsourcing_taskflow.common.security.auth.AuthUserDto;
 import com.example.outsourcing_taskflow.common.entity.Task;
 import com.example.outsourcing_taskflow.common.enums.IsDeleted;
 import com.example.outsourcing_taskflow.common.enums.TaskStatusEnum;

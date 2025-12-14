@@ -1,6 +1,5 @@
 package com.example.outsourcing_taskflow.domain.user.model.response;
 
-import com.example.outsourcing_taskflow.common.entity.User;
 import com.example.outsourcing_taskflow.common.enums.UserRoleEnum;
 import com.example.outsourcing_taskflow.domain.user.model.dto.UserDto;
 import lombok.Getter;
